@@ -1,0 +1,63 @@
+/*=======================================================================*/
+/** @file   fixtexturepaths.mel
+
+	used in conjunction with mayaSvn will attempt to fix
+	texture paths on loading and also set the project automatically
+
+	After loading the mayaSnv plugin add the following line to your
+	userSetup.mel or other startup script
+
+	eval mayaSvn -ae "\"AfterOpen\"" -sn "\"FixTexturePaths\"" -m "\"eval FixTexturePaths\"";
+
+    @author Gregg A. Tavares
+*/
+
+global proc FixTexturePaths()
+{
+	string $files[] = `ls -typ file`;
+
+	string $sceneFile = `file -q -expandName -sceneName`;
+	string $scenePath = dirname($sceneFile);
+	string $sceneBase = dirname($scenePath);
+
+	string $sourceimagePath = $sceneBase + "/sourceimages";
+	string $texturePath     = $sceneBase + "/textures";
+
+	string $scenePathName = basename($scenePath, "");
+	if (tolower($scenePathName) == "scenes")
+	{
+		setProject $sceneBase;
+		print ("// set project to " + $sceneBase + "\n");
+	}
+
+	for ($file in $files)
+	{
+		string $attrName = $file + ".fileTextureName";
+		string $currentFullPath = `getAttr ($attrName)`;
+		string $currentPath = dirname ($currentFullPath);
+		string $currentName = basename ($currentFullPath, "");
+
+		if (!(`file -q -ex $currentFullPath`))
+		{
+			string $newPath = $sourceimagePath + "/" + $currentName;
+			if (`file -q -ex $newPath`)
+			{
+				$newPath = `workspace -projectPath $newPath`;
+				setAttr -type "string"  $attrName $newPath;
+				print ("// changed " + $currentFullPath + " to " + $newPath + "\n");
+			}
+			else
+			{
+				$newPath = $texturePath + "/" + $currentName;
+				if (`file -q -ex $newPath`)
+				{
+					$newPath = `workspace -projectPath $newPath`;
+					setAttr -type "string" $attrName $newPath;
+					print ("// changed " + $currentFullPath + " to " + $newPath + "\n");
+				}
+			}
+		}
+	}
+
+	file -mf 0;
+}
