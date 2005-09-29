@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mayaSvn", "mayaSvn.vcproj", "{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Debug.ActiveCfg = Debug|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Debug.Build.0 = Debug|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Release.ActiveCfg = Release|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
