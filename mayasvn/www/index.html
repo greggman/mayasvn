@@ -32,7 +32,7 @@ pre { background-color: #DDC; padding: 10px; border: 1px solid #663 ; }
 <li>Next you need to add some code to your userSetup.mel file to enable it.  userSetup.mel is usually found in <span class="fname">My Documents\Maya\&lt;ver&gt;\scripts</SPAN>.  If it does not exist just create it.  Here is the simplest version</P>
 <pre>
 // -- userSetup.mel
-SVNSetup;
+SVNSetup(1);
 </PRE>
 <p>That's it. If you now try to open or save a file that happens to be in a subversion controlled folder you should get asked the appropriate subversion related questions</P>
     </OL>
@@ -58,21 +58,21 @@ ProjectXSetup;
 // ProjectXSetup.mel
 global proc ProjectXSetup()
 {
-    string $base = `getenv "PROJECTX_BASE"`;
-    string $temp = `getenv "TMP"`;
-    string $localCopy = $temp + "/mayaSvn.mll";
-    string $svnCopy   = $base + "/tools/maya/6.5/plugins/mayaSvn.mll";
-
-    // we copy it local and use it there otherwise it will be locked
-    // and in use while maya is running making it impossible to update.
-    sysFile -copy $localCopy $svnCopy;
-
-    loadPlugin($localCopy);
-
     // don't enable it if we are in batch mode
     if (!(`about -batch`))
     {
-        SVNSetup;
+        string $base = `getenv "PROJECTX_BASE"`;
+        string $temp = `getenv "TMP"`;
+        string $localCopy = $temp + "/mayaSvn.mll";
+        string $svnCopy   = $base + "/tools/maya/6.5/plugins/mayaSvn.mll";
+
+        // we copy it local and use it there otherwise it will be locked
+        // and in use while maya is running making it impossible to update.
+        sysFile -copy $localCopy $svnCopy;
+
+        loadPlugin($localCopy);
+
+        SVNSetup(1);
         // set the path to the svn client tools so it doesn't have to
         // be in our OS "path"
         SVNSetPath($base + "/tools/svn/bin");
