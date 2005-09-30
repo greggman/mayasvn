@@ -25,463 +25,468 @@ global string $SVN_LASTEDITEDBY;
 
 proc dprint(string $str)
 {
-	global int $SVN_DEBUG;
+        global int $SVN_DEBUG;
 
-	if ($SVN_DEBUG)
-	{
-		print($str);
-	}
+        if ($SVN_DEBUG)
+        {
+                print($str);
+        }
 }
 
 proc string Mayaify(string $path)
 {
-	string $parts[];
-	tokenize $path "\\" $parts;
-	string $newPath = stringArrayToString($parts, "/");
-	return $newPath;
+        string $parts[];
+        tokenize $path "\\" $parts;
+        string $newPath = stringArrayToString($parts, "/");
+        return $newPath;
 }
 
 proc string Winify(string $path)
 {
-	string $parts[];
-	tokenize $path "/" $parts;
-	string $newPath = stringArrayToString($parts, "\\");
-	return $newPath;
+        string $parts[];
+        tokenize $path "/" $parts;
+        string $newPath = stringArrayToString($parts, "\\");
+        return $newPath;
 }
 
 proc string EscapeBackslash(string $path)
 {
-	string $parts[];
-	tokenize $path "\\" $parts;
-	string $newPath = stringArrayToString($parts, "\\\\");
-	return $newPath;
+        string $parts[];
+        tokenize $path "\\" $parts;
+        string $newPath = stringArrayToString($parts, "\\\\");
+        return $newPath;
 }
 
 global proc string SVNencodeString(string $path)
 {
-	string $parts[];
-	tokenize $path "\\" $parts;
-	string $path = stringArrayToString($parts, "\\\\");
-	tokenize $path "\t" $parts;
-	string $path = stringArrayToString($parts, "\\t");
-	tokenize $path "\r" $parts;
-	string $path = stringArrayToString($parts, "\\n");
-	tokenize $path "\n" $parts;
-	string $path = stringArrayToString($parts, "\\n");
-	tokenize $path "\"" $parts;
-	string $path = stringArrayToString($parts, "\\\"");
-	return $path;
+        string $parts[];
+        tokenize $path "\\" $parts;
+        string $path = stringArrayToString($parts, "\\\\");
+        tokenize $path "\t" $parts;
+        string $path = stringArrayToString($parts, "\\t");
+        tokenize $path "\r" $parts;
+        string $path = stringArrayToString($parts, "\\n");
+        tokenize $path "\n" $parts;
+        string $path = stringArrayToString($parts, "\\n");
+        tokenize $path "\"" $parts;
+        string $path = stringArrayToString($parts, "\\\"");
+        return $path;
 }
 
 /*************************************************************************
                              GetBaseSVNName
  *************************************************************************/
 /**
-	@brief  return the mayaSvn basename of a file
+        @brief  return the mayaSvn basename of a file
 
-			given a path like "c:\folder\my_file_with_cube.mb" returns
-			"my_file".
+                        given a path like "c:\folder\my_file_with_cube.mb" returns
+                        "my_file".
 
-			The rule is allow 1 underscore then remove the rest of the filename
+                        The rule is allow 1 underscore then remove the rest of the filename
 
-	@param  $path
+        @param  $path
 
-	@return	mayaSvn base name
+        @return mayaSvn base name
 
-	@see
+        @see
 
-	@author 09/26/05 GAT: Created.
+        @author 09/26/05 GAT: Created.
 
 */
 /* ----------------------------------------------------------------------- */
 
 proc string GetBaseSVNName (string $path)
 {
-	string $basename = basename($path, "");
-	$basename = substring($basename, 1, size($basename) - 3); // remove .mb / .ma
+        string $basename = basename($path, "");
+        $basename = substring($basename, 1, size($basename) - 3); // remove .mb / .ma
 
-	string $parts[];
-	tokenize $basename "_" $parts;
+        string $parts[];
+        tokenize $basename "_" $parts;
 
-	$basename = $parts[0];
+        $basename = $parts[0];
 
-	if (size($parts) > 1)
-	{
-		$basename = $basename + "_" + $parts[1];
-	}
+        if (size($parts) > 1)
+        {
+                $basename = $basename + "_" + $parts[1];
+        }
 
-	return $basename;
+        return $basename;
 }
 
 proc int SVNFilesAreSame (string $file1, string $file2)
 {
-	string $cmd = "mayaSvn -cf \"" + EscapeBackslash(Winify($file1)) + "\" -file2 \"" + EscapeBackslash(Winify($file2)) + "\"";
-	return (`eval($cmd)`);
+        string $cmd = "mayaSvn -cf \"" + EscapeBackslash(Winify($file1)) + "\" -file2 \"" + EscapeBackslash(Winify($file2)) + "\"";
+        return (`eval($cmd)`);
+}
+
+proc string SVNGetEnglishMsg(int $msgid)
+{
+        if ($msgid ==  1) { return "%1\n\nYou cancelled the save as!"; }
+        if ($msgid ==  2) { return "%1\n\nCould not copy to dest"; }
+        if ($msgid ==  3) { return "%1\n\nCould not get the lock."; }
+        if ($msgid ==  4) { return "%1\n\nYou do NOT have the lock."; }
+        if ($msgid ==  5) { return "%1\n\nError updating texture %2"; }
+        if ($msgid ==  6) { return "%1\n\nYou must take the new textures"; }
+        if ($msgid ==  7) { return "DO NOT EDIT!!!"; }
+        if ($msgid ==  8) { return "Lock"; }    // get lock
+        if ($msgid ==  9) { return "Skip"; }    // abort/skip/stop
+        if ($msgid == 10) { return "%1 needs to be locked before you can edit it.\n\nDo you want to lock the file?"; }
+        if ($msgid == 11) { return "The following textures/files will be overwritten with the latest versions from subversion\n\n%1"; }
+        if ($msgid == 12) { return "Update"; }
+        if ($msgid == 14) { return "%1\n\nis already locked by %2."; }
+        if ($msgid == 15) { return "%1\n\nError trying to get lock status"; }
+        if ($msgid == 16) { return "do you want to commit\n\n%1"; }
+        if ($msgid == 17) { return "Commit"; }
+        if ($msgid == 18) { return "Error:\n\n%1\n\nCould not commit to svn"; }
+        if ($msgid == 19) { return "do you want to add\n\n%1"; }
+        if ($msgid == 20) { return "Add"; }
+        if ($msgid == 21) { return "Error:\n\n%1\n\nCould not add to svn"; }
+        if ($msgid == 22) { return "Keep the lock?\n\n%1"; }
+        if ($msgid == 23) { return "Keep"; }
+        if ($msgid == 24) { return "Enter a comment"; }
+        if ($msgid == 25) { return "Cancel"; }
+        if ($msgid == 26) { return "Okay"; }
+        if ($msgid == 27) { return "%1\n\nThere is no matching file in subversion"; }
+        if ($msgid == 28) { return "Error\n\nSVN_Project_Paths is not set"; }
+        if ($msgid == 29) { return "Trouble making folers for scene\n\n%1"; }
+        if ($msgid == 30) { return "The file\n%1\n\nin subversion is newer than the file\n\n%2\n\nyou a trying to open.  It was lasted edited by %3. You must save the newest version somewhere locally to get the lock."; }
+        if ($msgid == 31) { return "Save"; }
+        if ($msgid == 32) { return "last edited by %1"; }
+        return "** missing msg **";
 }
 
 proc string SVNGetMsgByID(int $msgid)
 {
-	global string $SVN_MSG_CALLBACK;
-	string $result;
+        global string $SVN_MSG_CALLBACK;
+        string $result;
 
-	if (size($SVN_MSG_CALLBACK) > 0)
-	{
-		$result = eval($SVN_MSG_CALLBACK + "(" + $msgid + ")");
-		if (size($result) > 0)
-		{
-			return $result;
-		}
-	}
+        if (size($SVN_MSG_CALLBACK) > 0)
+        {
+                $result = eval($SVN_MSG_CALLBACK + "(" + $msgid + ")");
+                if (size($result) > 0)
+                {
+                        return $result;
+                }
+        }
 
-	if ($msgid ==  1) { return "%1\n\nYou cancelled the save as!"; }
-	if ($msgid ==  2) { return "%1\n\nCould not copy to dest"; }
-	if ($msgid ==  3) { return "%1\n\nCould not get the lock."; }
-	if ($msgid ==  4) { return "%1\n\nYou do NOT have the lock."; }
-	if ($msgid ==  5) { return "%1\n\nError updating texture %2"; }
-	if ($msgid ==  6) { return "%1\n\nYou must take the new textures"; }
-	if ($msgid ==  7) { return "DO NOT EDIT!!!"; }
-	if ($msgid ==  8) { return "Lock"; }	// get lock
-	if ($msgid ==  9) { return "Skip"; }	// abort/skip/stop
-	if ($msgid == 10) { return "%1 needs to be locked before you can edit it.\n\nDo you want to lock the file?"; }
-	if ($msgid == 11) { return "The following textures/files will be overwritten with the latest versions from subversion\n\n%1"; }
-	if ($msgid == 12) { return "Update"; }
-	if ($msgid == 14) { return "%1\n\nis already locked by %2."; }
-	if ($msgid == 15) { return "%1\n\nError trying to get lock status"; }
-	if ($msgid == 16) { return "do you want to commit\n\n%1"; }
-	if ($msgid == 17) { return "Commit"; }
-	if ($msgid == 18) { return "Error:\n\n%1\n\nCould not commit to svn"; }
-	if ($msgid == 19) { return "do you want to add\n\n%1"; }
-	if ($msgid == 20) { return "Add"; }
-	if ($msgid == 21) { return "Error:\n\n%1\n\nCould not add to svn"; }
-	if ($msgid == 22) { return "Keep the lock?\n\n%1"; }
-	if ($msgid == 23) { return "Keep"; }
-	if ($msgid == 24) { return "Enter a comment"; }
-	if ($msgid == 25) { return "Cancel"; }
-	if ($msgid == 26) { return "Okay"; }
-	if ($msgid == 27) { return "%1\n\nThere is no matching file in subversion"; }
-	if ($msgid == 28) { return "Error\n\nSVN_Project_Paths is not set"; }
-	if ($msgid == 29) { return "Trouble making folers for scene\n\n%1"; }
-	if ($msgid == 30) { return "The file\n%1\n\nin subversion is newer than the file\n\n%2\n\nyou a trying to open.  It was lasted edited by %3. You must save the newest version somewhere locally to get the lock."; }
-	if ($msgid == 31) { return "Save"; }
-	if ($msgid == 32) { return "last edited by %1"; }
-	return "** missing msg **";
+        return SVNGetEnglishMsg($msgid);
 }
 
 global proc SVNSetMessageCallback(string $callback)
 {
-	global string $SVN_MSG_CALLBACK;
+        global string $SVN_MSG_CALLBACK;
 
-	$SVN_MSG_CALLBACK = $callback;
+        $SVN_MSG_CALLBACK = $callback;
 }
 
 global proc SVNSet2OptionDlgCallback(string $callback)
 {
-	global string $SVN_2OPTIONDLG_CALLBACK;
+        global string $SVN_2OPTIONDLG_CALLBACK;
 
-	$SVN_2OPTIONDLG_CALLBACK = $callback;
+        $SVN_2OPTIONDLG_CALLBACK = $callback;
 }
 
 global proc SVNSet1OptionDlgCallback(string $callback)
 {
-	global string $SVN_1OPTIONDLG_CALLBACK;
+        global string $SVN_1OPTIONDLG_CALLBACK;
 
-	$SVN_1OPTIONDLG_CALLBACK = $callback;
+        $SVN_1OPTIONDLG_CALLBACK = $callback;
 }
 
 global proc SVNSetGetTextDlgCallback(string $callback)
 {
-	global string $SVN_GETTEXTDLG_CALLBACK;
+        global string $SVN_GETTEXTDLG_CALLBACK;
 
-	$SVN_GETTEXTDLG_CALLBACK = $callback;
+        $SVN_GETTEXTDLG_CALLBACK = $callback;
 }
 
 global proc SVNSetUserIDCallback(string $callback)
 {
-	global string $SVN_USERID_CALLBACK;
+        global string $SVN_USERID_CALLBACK;
 
-	$SVN_USERID_CALLBACK = $callback;
+        $SVN_USERID_CALLBACK = $callback;
 }
 
 proc string SVNFormat(int $msgid, string $args[])
 {
-	string $msg = SVNGetMsgByID ($msgid);
-	string $arg;
-	int $count = 1;
-	for ($arg in $args)
-	{
-		string $argid = "%" + $count;
+        string $msg = SVNGetMsgByID ($msgid);
+        string $arg;
+        int $count = 1;
+        for ($arg in $args)
+        {
+                string $argid = "%" + $count;
 
-		$msg = `substitute $argid $msg $arg`;
+                $msg = `substitute $argid $msg $arg`;
 
-		$count++;
-	}
-	return $msg;
+                $count++;
+        }
+        return $msg;
 }
 
 proc string[] SVNGetText(string $args[], int $msgid, int $opt1id, int $opt2id)
 {
-	global string $SVN_GETTEXTDLG_CALLBACK;
+        global string $SVN_GETTEXTDLG_CALLBACK;
 
-	string $message = SVNFormat($msgid, $args);
-	string $opt1    = SVNGetMsgByID($opt1id);
-	string $opt2    = SVNGetMsgByID($opt2id);
+        string $message = SVNFormat($msgid, $args);
+        string $opt1    = SVNGetMsgByID($opt1id);
+        string $opt2    = SVNGetMsgByID($opt2id);
 
-	string $res[];
+        string $res[];
 
-	$res[0] = "1";
-	$res[1] = "";
+        $res[0] = "1";
+        $res[1] = "";
 
-	if (size($SVN_GETTEXTDLG_CALLBACK) > 0)
-	{
-		string $cmd = $SVN_GETTEXTDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString($opt1) + "\", \"" + SVNencodeString($opt2) + "\")";
-		$res = eval($cmd);
-	}
-	else
-	{
-		string $result;
-		$result = `promptDialog -t "Subversion" -m $message -bgc 0.7 0.8 1.0 -b $opt1 -b $opt2`;
-		if ($result == $opt2)
-		{
-			$res[0] = "2";
-		}
-		else if ($result == $opt1)
-		{
-			$res[0] = "1";
-			$res[1] = `promptDialog -query -text`;
-		}
-	}
-	return $res;
+        if (size($SVN_GETTEXTDLG_CALLBACK) > 0)
+        {
+                string $cmd = $SVN_GETTEXTDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString($opt1) + "\", \"" + SVNencodeString($opt2) + "\")";
+                $res = eval($cmd);
+        }
+        else
+        {
+                string $result;
+                $result = `promptDialog -t "Subversion" -m $message -bgc 0.7 0.8 1.0 -b $opt1 -b $opt2`;
+                if ($result == $opt2)
+                {
+                        $res[0] = "2";
+                }
+                else if ($result == $opt1)
+                {
+                        $res[0] = "1";
+                        $res[1] = `promptDialog -query -text`;
+                }
+        }
+        return $res;
 }
 
 proc int SVN2OptionDialog (string $args[], int $msgid, int $opt1id, int $opt2id, string $colorType)
 {
-	global string $SVN_2OPTIONDLG_CALLBACK;
+        global string $SVN_2OPTIONDLG_CALLBACK;
 
-	string $message = SVNFormat($msgid, $args);
-	string $opt1    = SVNGetMsgByID($opt1id);
-	string $opt2    = SVNGetMsgByID($opt2id);
-	string $color   = "1.0 1.0 1.0";
+        string $message = SVNFormat($msgid, $args);
+        string $opt1    = SVNGetMsgByID($opt1id);
+        string $opt2    = SVNGetMsgByID($opt2id);
+        string $color   = "1.0 1.0 1.0";
 
-	if ($colorType == "question")
-	{
-		$color   = "0.5 1.0 1.0";
-	}
+        if ($colorType == "question")
+        {
+                $color   = "0.5 1.0 1.0";
+        }
 
-	string $result;
-	if (size($SVN_2OPTIONDLG_CALLBACK) > 0)
-	{
-		string $cmd = $SVN_2OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString($opt1) + "\", \"" + SVNencodeString($opt2) + "\")";
-		$result = eval($cmd);
-	}
-	else
-	{
-		$result = `confirmDialog -t "Subversion" -m $message -bgc 0.5 1.0 1.0 -b $opt1 -b $opt2`;
-	}
-	if ($result == $opt1) { return 1; }
-	if ($result == $opt2) { return 2; }
-	return 0;
+        string $result;
+        if (size($SVN_2OPTIONDLG_CALLBACK) > 0)
+        {
+                string $cmd = $SVN_2OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString($opt1) + "\", \"" + SVNencodeString($opt2) + "\")";
+                $result = eval($cmd);
+        }
+        else
+        {
+                $result = `confirmDialog -t "Subversion" -m $message -bgc 0.5 1.0 1.0 -b $opt1 -b $opt2`;
+        }
+        if ($result == $opt1) { return 1; }
+        if ($result == $opt2) { return 2; }
+        return 0;
 }
 
 proc SVNDoNotEdit (string $args[], int $msgid)
 {
-	global string $SVN_1OPTIONDLG_CALLBACK;
+        global string $SVN_1OPTIONDLG_CALLBACK;
 
-	string $message = SVNFormat($msgid, $args) + "\n\n" + SVNGetMsgByID(7);
-	if (size($SVN_1OPTIONDLG_CALLBACK) > 0)
-	{
-		string $cmd = $SVN_1OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString(SVNGetMsgByID(26)) + "\")";
-		eval($cmd);
-	}
-	else
-	{
-		confirmDialog -t "Subversion" -m $message -bgc 1.0 0.2 0.2;
-	}
+        string $message = SVNFormat($msgid, $args) + "\n\n" + SVNGetMsgByID(7);
+        if (size($SVN_1OPTIONDLG_CALLBACK) > 0)
+        {
+                string $cmd = $SVN_1OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString(SVNGetMsgByID(26)) + "\")";
+                eval($cmd);
+        }
+        else
+        {
+                confirmDialog -t "Subversion" -m $message -bgc 1.0 0.2 0.2;
+        }
 }
 
 proc SVNErrorPrompt (string $args[], int $msgid)
 {
-	global string $SVN_1OPTIONDLG_CALLBACK;
+        global string $SVN_1OPTIONDLG_CALLBACK;
 
-	string $message = SVNFormat($msgid, $args);
-	if (size($SVN_1OPTIONDLG_CALLBACK) > 0)
-	{
-		string $cmd = $SVN_1OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString(SVNGetMsgByID(26)) + "\")";
-		eval($cmd);
-	}
-	else
-	{
-		confirmDialog -t "Subversion" -m $message -bgc 1.0 0.2 0.2;
-	}
+        string $message = SVNFormat($msgid, $args);
+        if (size($SVN_1OPTIONDLG_CALLBACK) > 0)
+        {
+                string $cmd = $SVN_1OPTIONDLG_CALLBACK + "(\"Subversion\", \"" + SVNencodeString($message) + "\", \"" + SVNencodeString(SVNGetMsgByID(26)) + "\")";
+                eval($cmd);
+        }
+        else
+        {
+                confirmDialog -t "Subversion" -m $message -bgc 1.0 0.2 0.2;
+        }
 }
 
 global proc int SVNSetSelectedFile (string $filename, string $fileType)
 {
-	global string $SVN_FILE_SELECTED;
+        global string $SVN_FILE_SELECTED;
 
-	$SVN_FILE_SELECTED = $filename;
+        $SVN_FILE_SELECTED = $filename;
 
-	return 1;
+        return 1;
 }
 
 global proc SVNSetPath(string $path)
 {
-	global string $SVN_PATH;
+        global string $SVN_PATH;
 
-	$SVN_PATH = $path;
+        $SVN_PATH = $path;
 }
 
 global proc SVNSetProjectPaths(string $paths[])
 {
-	global string $SVN_LOCAL_PROJECT_PATHS[];
+        global string $SVN_LOCAL_PROJECT_PATHS[];
 
-	$SVN_LOCAL_PROJECT_PATHS = $paths;
+        $SVN_LOCAL_PROJECT_PATHS = $paths;
 }
 
 global proc SVNSetTexpathExclusions(string $paths[])
 {
-	global string $SVN_LOCAL_TEXPATH_EXCLUSIONS[];
+        global string $SVN_LOCAL_TEXPATH_EXCLUSIONS[];
 
-	$SVN_LOCAL_TEXPATH_EXCLUSIONS = $paths;
+        $SVN_LOCAL_TEXPATH_EXCLUSIONS = $paths;
 }
 
 proc string SVNExecute(string $args)
 {
-	global string $SVN_PATH;
+        global string $SVN_PATH;
 
-	// set to english so we can parse the errors
-	putenv "LC_MESSAGES" "en";
+        // set to english so we can parse the errors
+        putenv "LC_MESSAGES" "en";
 
-	string $cmd = $SVN_PATH + "/svn.exe " + $args;
-	string $result = `system($cmd)`;
+        string $cmd = $SVN_PATH + "/svn.exe " + $args;
+        string $result = `system($cmd)`;
 
-	return $result;
+        return $result;
 }
 
 proc string SVNTranslateUsername(string $username)
 {
-	global string $SVN_USERID_CALLBACK;
+        global string $SVN_USERID_CALLBACK;
 
-	if (size($SVN_USERID_CALLBACK) > 0)
-	{
-		$username = eval ($SVN_USERID_CALLBACK + "(\"" + SVNencodeString($username) + "\")");
-	}
+        if (size($SVN_USERID_CALLBACK) > 0)
+        {
+                $username = eval ($SVN_USERID_CALLBACK + "(\"" + SVNencodeString($username) + "\")");
+        }
 
-	return $username;
+        return $username;
 }
 
 global proc int SVNGetLock(string $filename, string $comment)
 {
-	global string $SVN_LASTLOCKEDPERSON;
+        global string $SVN_LASTLOCKEDPERSON;
 
-	string $result = SVNExecute("lock \"" + $filename+ "\" -m \"" + SVNencodeString($comment) + "\"");
-	dprint ($result);
+        string $result = SVNExecute("lock \"" + $filename+ "\" -m \"" + SVNencodeString($comment) + "\"");
+        dprint ($result);
 
-	$SVN_LASTLOCKEDPERSON = "** unknown person **";
-	//                               111111111122222222223
-	//                      123456789012345678901234567890
-	string $locker = match("already locked by user '.*'", $result);
-	if (size($locker) > 25)
-	{
-	    // [ 0      ] [ 1           ] [ 2                       ] [ 3 ] [ 4           ] [ 5               ]
-		// svn: Path '/folder/file.mb' is already locked by user 'gregg' in filesystem '//foo/folder/svn/db'
-		string $parts[];
-		tokenize $locker "'" $parts;
-		if (size($parts) >= 3)
-		{
-			print (stringArrayToString($parts,"|"));
-			$locker = $parts[1];
-			$SVN_LASTLOCKEDPERSON = SVNTranslateUsername($locker);
-		}
-	}
+        $SVN_LASTLOCKEDPERSON = "** unknown person **";
+        //                               111111111122222222223
+        //                      123456789012345678901234567890
+        string $locker = match("already locked by user '.*'", $result);
+        if (size($locker) > 25)
+        {
+            // [ 0      ] [ 1           ] [ 2                       ] [ 3 ] [ 4           ] [ 5               ]
+                // svn: Path '/folder/file.mb' is already locked by user 'gregg' in filesystem '//foo/folder/svn/db'
+                string $parts[];
+                tokenize $locker "'" $parts;
+                if (size($parts) >= 3)
+                {
+                        print (stringArrayToString($parts,"|"));
+                        $locker = $parts[1];
+                        $SVN_LASTLOCKEDPERSON = SVNTranslateUsername($locker);
+                }
+        }
 
-	// svn returns something like
-	//
-	//   'file' locked by user 'gregg' if successful
-	//
-	// or
-	//
-	//   svn: Path 'file' is already locked by user 'bob' in filesystem
-	//
-	// so let look for ourselves in the result and assume that's it
-	// You know, it would be really friggin awesome if svn.exe had an option
-	// to return the same thing always.  There appears to be a "--xml" option
-	// but it's not consistant and doesn't work with most commands :-(
-	//
-	string $username = getenv("USERNAME");
+        // svn returns something like
+        //
+        //   'file' locked by user 'gregg' if successful
+        //
+        // or
+        //
+        //   svn: Path 'file' is already locked by user 'bob' in filesystem
+        //
+        // so let look for ourselves in the result and assume that's it
+        // You know, it would be really friggin awesome if svn.exe had an option
+        // to return the same thing always.  There appears to be a "--xml" option
+        // but it's not consistant and doesn't work with most commands :-(
+        //
+        string $username = getenv("USERNAME");
 
-	return gmatch($result, "*" + $username + "*");
+        return gmatch($result, "*" + $username + "*");
 }
 
 global proc int SVNUpdateSceneAndGetLock(string $filename, string $comment)
 {
-	string $scenePath = dirname($filename);
-	string $sceneBase = dirname($scenePath);
+        string $scenePath = dirname($filename);
+        string $sceneBase = dirname($scenePath);
 
-	string $sourceimagePath = $sceneBase + "/sourceimages";
+        string $sourceimagePath = $sceneBase + "/sourceimages";
 
-	string $scenePathName = basename($scenePath, "");
-	if (tolower($scenePathName) == "scenes")
-	{
-		string $result = SVNExecute("update \"" + $sceneBase + "\"");
-		dprint ($result);
-	}
+        string $scenePathName = basename($scenePath, "");
+        if (tolower($scenePathName) == "scenes")
+        {
+                string $result = SVNExecute("update \"" + $sceneBase + "\"");
+                dprint ($result);
+        }
 
-	return SVNGetLock($filename, $comment);
+        return SVNGetLock($filename, $comment);
 }
 
 global proc int SVNReleaseLock(string $filename)
 {
-	string $result = SVNExecute("unlock \"" + $filename + "\"");
+        string $result = SVNExecute("unlock \"" + $filename + "\"");
 
-	return gmatch($result, "*unlocked*");
+        return gmatch($result, "*unlocked*");
 }
 
 global proc int SVNCommit(string $filename, string $comment)
 {
-	string $result = SVNExecute("commit \"" + $filename + "\" -m \"" + SVNencodeString($comment) + "\"");
-	return (gmatch($result, "*Committed*"));
+        string $result = SVNExecute("commit \"" + $filename + "\" -m \"" + SVNencodeString($comment) + "\"");
+        return (gmatch($result, "*Committed*"));
 }
 
 global proc int SVNAdd(string $filename)
 {
-	string $result  = SVNExecute("add \"" + $filename + "\" --non-recursive");
+        string $result  = SVNExecute("add \"" + $filename + "\" --non-recursive");
 
-	// svn add appears to return "A       c:\folder\filename" on success
-	// so let's check if the filename we passed in matched the end of the string
+        // svn add appears to return "A       c:\folder\filename" on success
+        // so let's check if the filename we passed in matched the end of the string
 
-	string $winname = Winify($filename);
-	int $winsize = size($winname);
-	int $ressize = size($result);
-	if ($ressize > $winsize)
-	{
-		string $endres  = substring($result, $ressize - $winsize - 1, $ressize - 2); // there's a \n on the end
-		dprint($endres  + "\n");
-		dprint($winname + "\n");
-		if (tolower($endres) == tolower($winname))
-		{
-			return 1;
-		}
-	}
-	return 0;
+        string $winname = Winify($filename);
+        int $winsize = size($winname);
+        int $ressize = size($result);
+        if ($ressize > $winsize)
+        {
+                string $endres  = substring($result, $ressize - $winsize - 1, $ressize - 2); // there's a \n on the end
+                dprint($endres  + "\n");
+                dprint($winname + "\n");
+                if (tolower($endres) == tolower($winname))
+                {
+                        return 1;
+                }
+        }
+        return 0;
 }
 
 global proc int SVNIsInRepository(string $filename)
 {
-	string $info = SVNExecute("info \"" + $filename + "\"");
-	dprint($info);
-	return (gmatch($info, "*Revision*"));
+        string $info = SVNExecute("info \"" + $filename + "\"");
+        dprint($info);
+        return (gmatch($info, "*Revision*"));
 }
 
 proc string SVNGetLockPerson(string $filename)
 {
-	global string $SVN_LASTLOCKEDPERSON;
+        global string $SVN_LASTLOCKEDPERSON;
 
-	if (SVNGetLock($filename, ""))
-	{
-		SVNReleaseLock($filename);
-	}
+        if (SVNGetLock($filename, ""))
+        {
+                SVNReleaseLock($filename);
+        }
 
-	return $SVN_LASTLOCKEDPERSON;
+        return $SVN_LASTLOCKEDPERSON;
 }
 
 // maya counts from 1 :-(
@@ -492,127 +497,127 @@ proc string SVNGetLockPerson(string $filename)
 // 0 = unlocked, 1 = locked locally, 2 = locked somewhere else, -1 = failed
 global proc int SVNLockStatus(string $filename)
 {
-	global string $SVN_LOCKEDBY;
-	global string $SVN_LASTEDITEDBY;
+        global string $SVN_LOCKEDBY;
+        global string $SVN_LASTEDITEDBY;
 
-	$SVN_LASTEDITEDBY = "** unknown person **";
+        $SVN_LASTEDITEDBY = "** unknown person **";
 
-	string $info = SVNExecute("status -u -v \"" + $filename + "\"");
-	dprint($info);
-	if (size($info) >= 6)
-	{
-		string $parts[];
+        string $info = SVNExecute("status -u -v \"" + $filename + "\"");
+        dprint($info);
+        if (size($info) >= 6)
+        {
+                string $parts[];
 
-		tokenize $info " " $parts;
-		if (size($parts) >= 3)
-		{
-			$SVN_LASTEDITEDBY = SVNTranslateUsername($parts[2]);
-		}
+                tokenize $info " " $parts;
+                if (size($parts) >= 3)
+                {
+                        $SVN_LASTEDITEDBY = SVNTranslateUsername($parts[2]);
+                }
 
-		string $lockStatus = substring($info, 6, 6);
-		if ($lockStatus == "K")
-		{
-			return 1;	// locked locally
-		}
-		else if ($lockStatus == "O")
-		{
-			$SVN_LOCKEDBY = SVNGetLockPerson($filename);
-			dprint ("// locked by : " + $SVN_LOCKEDBY + "\n");
-			return 2;
-		}
-		else if ($lockStatus == " ")
-		{
-			return 0;
-		}
-	}
+                string $lockStatus = substring($info, 6, 6);
+                if ($lockStatus == "K")
+                {
+                        return 1;       // locked locally
+                }
+                else if ($lockStatus == "O")
+                {
+                        $SVN_LOCKEDBY = SVNGetLockPerson($filename);
+                        dprint ("// locked by : " + $SVN_LOCKEDBY + "\n");
+                        return 2;
+                }
+                else if ($lockStatus == " ")
+                {
+                        return 0;
+                }
+        }
 
-	return -1;
+        return -1;
 }
 
 proc string SVNLastEditedBy(string $filename)
 {
-	string $lasteditedby = "** unknown person **";
+        string $lasteditedby = "** unknown person **";
 
-	string $info = SVNExecute("status -u -v \"" + $filename + "\"");
-	dprint($info);
-	if (size($info) >= 6)
-	{
-		string $parts[];
+        string $info = SVNExecute("status -u -v \"" + $filename + "\"");
+        dprint($info);
+        if (size($info) >= 6)
+        {
+                string $parts[];
 
-		tokenize $info " " $parts;
-		if (size($parts) >= 3)
-		{
-			$lasteditedby = SVNTranslateUsername($parts[2]);
-		}
-	}
+                tokenize $info " " $parts;
+                if (size($parts) >= 3)
+                {
+                        $lasteditedby = SVNTranslateUsername($parts[2]);
+                }
+        }
 
-	return $lasteditedby;
+        return $lasteditedby;
 }
 
 proc string SVNSceneFileToProjectPath (string $projectPath, string $sceneFile)
 {
-	string $baseSVNName = GetBaseSVNName($sceneFile);
-	string $ext         = fileExtension($sceneFile);
+        string $baseSVNName = GetBaseSVNName($sceneFile);
+        string $ext         = fileExtension($sceneFile);
 
-	return $projectPath + "/" + $baseSVNName + "/scenes/" + $baseSVNName + "." + $ext;
+        return $projectPath + "/" + $baseSVNName + "/scenes/" + $baseSVNName + "." + $ext;
 }
 
 /*************************************************************************
                           SVNFileInProjectPaths
  *************************************************************************/
 /**
-	@brief  Check if a file is in one of the project paths
+        @brief  Check if a file is in one of the project paths
 
-	If you have project paths set by calling SVNSetProjectPaths
-	this function will check, given a sceneFile named
+        If you have project paths set by calling SVNSetProjectPaths
+        this function will check, given a sceneFile named
 
-	x:\folder\folder\scenefile.mb
+        x:\folder\folder\scenefile.mb
 
-	it will check each project path as follows
+        it will check each project path as follows
 
-	projectpath\scenefile\scenes\scenefile.mb
+        projectpath\scenefile\scenes\scenefile.mb
 
-	@param  $sceneFile
+        @param  $sceneFile
 
-	@return  on match returns path to file in project, "" if not found
+        @return  on match returns path to file in project, "" if not found
 
-	@see
+        @see
 
-	@author 09/27/05 GAT: Created.
+        @author 09/27/05 GAT: Created.
 
 */
 /* ----------------------------------------------------------------------- */
 
 proc string SVNFileInProjectPaths (string $sceneFile)
 {
-	global string $SVN_LOCAL_PROJECT_PATHS[];
+        global string $SVN_LOCAL_PROJECT_PATHS[];
 
-	string $svnFile     = "";
+        string $svnFile     = "";
 
-	// check each local path for a corresponding maya file
-	for ($path in $SVN_LOCAL_PROJECT_PATHS)
-	{
-		string $testPath = SVNSceneFileToProjectPath($path, $sceneFile);
+        // check each local path for a corresponding maya file
+        for ($path in $SVN_LOCAL_PROJECT_PATHS)
+        {
+                string $testPath = SVNSceneFileToProjectPath($path, $sceneFile);
 
-		if ((`file -q -ex $testPath`))
-		{
-			$svnFile = $testPath;
-			break;
-		}
-	}
+                if ((`file -q -ex $testPath`))
+                {
+                        $svnFile = $testPath;
+                        break;
+                }
+        }
 
-	return $svnFile;
+        return $svnFile;
 }
 
 //--------------------------------------------------------------------
 
 global proc int SVNBeforeOpenCheck()
 {
-	// check if this file is in subversion
-	// if in SVN you must lock it
-	string $scene = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
-	dprint ("about to open check (" + $scene + ")\n");
-	return 0;
+        // check if this file is in subversion
+        // if in SVN you must lock it
+        string $scene = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
+        dprint ("about to open check (" + $scene + ")\n");
+        return 0;
 }
 
 /***********************************  ************************************/
@@ -622,451 +627,451 @@ global proc int SVNBeforeOpenCheck()
 
 global proc SVNAskKeepLockLocal (string $sceneFile)
 {
-	global string $SVN_LOCKEDBY;
+        global string $SVN_LOCKEDBY;
 
-	string $svnFile = SVNFileInProjectPaths($sceneFile);
+        string $svnFile = SVNFileInProjectPaths($sceneFile);
 
-	// if we found a match
-	if (size($svnFile) > 0)
-	{
-		// see if it's in the repo
-		if (SVNIsInRepository($svnFile))
-		{
-			dprint ("// it's in repository as " + $svnFile + "\n");
-			int $lockStat = SVNLockStatus($svnFile);
-			if ($lockStat == 0) // unlocked
-			{
-				dprint ("// it's unlocked\n");
-				// do you want to lock the file
-				int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
-				if ($result == 1)
-				{
-					dprint ("// getting lock\n");
-					if (SVNGetLock($svnFile, ""))
-					{
-						print ("// good: got the lock\n");
-					}
-					else
-					{
-						// could not get the lock
-						SVNDoNotEdit({$svnFile}, 3);
-					}
-				}
-				else
-				{
-					// tell them they are NOT to edit it
-					SVNDoNotEdit({$svnFile}, 4);
-				}
-			}
-			else if ($lockStat == 1) // already have the lock
-			{
-				dprint ("// good: you already have the lock\n");
-			}
-			else if ($lockStat == 2) // someone else has the lock
-			{
-				dprint ("// someone else (" + $SVN_LOCKEDBY + ") has the lock\n");
-				SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
-				error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
-			}
-			else if ($lockStat == -1) // error checking
-			{
-				SVNDoNotEdit({$svnFile}, 15);
-				error("could not check subversion lock status");
-			}
-		}
-		else
-		{
-			dprint ("// it's NOT in repository\n");
-		}
-	}
+        // if we found a match
+        if (size($svnFile) > 0)
+        {
+                // see if it's in the repo
+                if (SVNIsInRepository($svnFile))
+                {
+                        dprint ("// it's in repository as " + $svnFile + "\n");
+                        int $lockStat = SVNLockStatus($svnFile);
+                        if ($lockStat == 0) // unlocked
+                        {
+                                dprint ("// it's unlocked\n");
+                                // do you want to lock the file
+                                int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
+                                if ($result == 1)
+                                {
+                                        dprint ("// getting lock\n");
+                                        if (SVNGetLock($svnFile, ""))
+                                        {
+                                                print ("// good: got the lock\n");
+                                        }
+                                        else
+                                        {
+                                                // could not get the lock
+                                                SVNDoNotEdit({$svnFile}, 3);
+                                        }
+                                }
+                                else
+                                {
+                                        // tell them they are NOT to edit it
+                                        SVNDoNotEdit({$svnFile}, 4);
+                                }
+                        }
+                        else if ($lockStat == 1) // already have the lock
+                        {
+                                dprint ("// good: you already have the lock\n");
+                        }
+                        else if ($lockStat == 2) // someone else has the lock
+                        {
+                                dprint ("// someone else (" + $SVN_LOCKEDBY + ") has the lock\n");
+                                SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
+                                error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
+                        }
+                        else if ($lockStat == -1) // error checking
+                        {
+                                SVNDoNotEdit({$svnFile}, 15);
+                                error("could not check subversion lock status");
+                        }
+                }
+                else
+                {
+                        dprint ("// it's NOT in repository\n");
+                }
+        }
 }
 
 /*************************************************************************
                            SVNBeforeOpenLocal
  *************************************************************************/
 /**
-	@brief  Get lock and copy locally before opening file
+        @brief  Get lock and copy locally before opening file
 
 
 
 
-	@return
+        @return
 
-	@see
+        @see
 
-	@author 09/26/05 GAT: Created.
+        @author 09/26/05 GAT: Created.
 
 */
 /* ----------------------------------------------------------------------- */
 
 global proc SVNBeforeOpenLocal ()
 {
-	global int $SVN_LOAD_STATE;
-	global string $SVN_LOCAL_PROJECT_PATHS[];
-	global string $SVN_FILE_TO_LOAD;
-	global string $SVN_FILE_SELECTED;
-	global string $SVN_ORIG_SCENEFILE;
-	global string $SVN_LOCKEDBY;
-	global string $SVN_LASTEDITEDBY;
+        global int $SVN_LOAD_STATE;
+        global string $SVN_LOCAL_PROJECT_PATHS[];
+        global string $SVN_FILE_TO_LOAD;
+        global string $SVN_FILE_SELECTED;
+        global string $SVN_ORIG_SCENEFILE;
+        global string $SVN_LOCKEDBY;
+        global string $SVN_LASTEDITEDBY;
 
-	if ($SVN_LOAD_STATE == 0)	// loading user selected file?
-	{
-		// check if this file is in subversion
-		// if in SVN you must lock it
-		string $sceneFile = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
-		dprint ("// about to open (" + $sceneFile + ")\n");
+        if ($SVN_LOAD_STATE == 0)       // loading user selected file?
+        {
+                // check if this file is in subversion
+                // if in SVN you must lock it
+                string $sceneFile = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
+                dprint ("// about to open (" + $sceneFile + ")\n");
 
-		string $svnFile = SVNFileInProjectPaths($sceneFile);
+                string $svnFile = SVNFileInProjectPaths($sceneFile);
 
-		// if we found a match
-		if (size($svnFile) > 0)
-		{
-			$SVN_ORIG_SCENEFILE = $svnFile;
+                // if we found a match
+                if (size($svnFile) > 0)
+                {
+                        $SVN_ORIG_SCENEFILE = $svnFile;
 
-			// see if it's in the repo
-			if (SVNIsInRepository($svnFile))
-			{
-				dprint ("// it's in repository as " + $svnFile + "\n");
-				int $lockStat = SVNLockStatus($svnFile);
-				if ($lockStat == 0) // unlocked
-				{
-					dprint ("// it's unlocked\n");
-					// do you want to lock the file
-					int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
-					if ($result == 1)
-					{
-						dprint ("// getting lock\n");
-						if (SVNUpdateSceneAndGetLock($svnFile, ""))
-						{
-							print ("// good: got the lock\n");
+                        // see if it's in the repo
+                        if (SVNIsInRepository($svnFile))
+                        {
+                                dprint ("// it's in repository as " + $svnFile + "\n");
+                                int $lockStat = SVNLockStatus($svnFile);
+                                if ($lockStat == 0) // unlocked
+                                {
+                                        dprint ("// it's unlocked\n");
+                                        // do you want to lock the file
+                                        int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
+                                        if ($result == 1)
+                                        {
+                                                dprint ("// getting lock\n");
+                                                if (SVNUpdateSceneAndGetLock($svnFile, ""))
+                                                {
+                                                        print ("// good: got the lock\n");
 
-							// check if it's the same as the file the user chose
-							if (!SVNFilesAreSame($svnFile, $sceneFile))
-							{
-								int $result = SVN2OptionDialog({$svnFile, $sceneFile, $SVN_LASTEDITEDBY}, 30, 31, 9, "question");
-								if ($result == 1)
-								{
-									// we need to copy the new file somewhere and load it
-									$SVN_FILE_SELECTED = "";
-									//fileBrowserDialog -m 1 -fc "SVNSetSelectedFile" -ft "mayaBinary" -an "Save Newest File" -tm "SaveAs";
-									string $cmd = "mayaSvn -fsd -title \"Save As\" -filter \"Maya Files|*.mb;*.ma\" -extension \"mb\" -fileName \"" + $sceneFile + "\"";
-									$SVN_FILE_SELECTED = `eval ($cmd)`;
-									if (size ($SVN_FILE_SELECTED) == 0)
-									{
-										SVNReleaseLock($svnFile);
-										SVNDoNotEdit({$svnFile}, 1);
-									}
-									else
-									{
-										// copy the newest file local
-										if (!(`sysFile -copy $SVN_FILE_SELECTED $svnFile`))
-										{
-											SVNReleaseLock($svnFile);
-											SVNDoNotEdit({$SVN_FILE_SELECTED}, 2);
-										}
-										else
-										{
-											$SVN_LOAD_STATE = 1;	// loading new file but we need to load this file!
-											$SVN_FILE_TO_LOAD = $SVN_FILE_SELECTED;
-										}
-									}
-								}
-								else
-								{
-									SVNReleaseLock($svnFile);
-									SVNDoNotEdit({$svnFile}, 1);
-								}
-							}
-							else
-							{
-								dprint ("// files are the same, no need to copy\n");
-								$SVN_LOAD_STATE = 2; // check the textures after load
-							}
-						}
-						else
-						{
-							// could not get the lock
-							SVNDoNotEdit({$svnFile}, 3);
-						}
-					}
-					else
-					{
-						// tell them they are NOT to edit it
-						SVNDoNotEdit({$svnFile}, 4);
-					}
-				}
-				else if ($lockStat == 1) // already have the lock
-				{
-					dprint ("// good: you already have the lock\n");
-					$SVN_LOAD_STATE = 2; // check the textures after load
-				}
-				else if ($lockStat == 2) // someone else has the lock
-				{
-					dprint ("// someone else (" + $SVN_LOCKEDBY + ") has the lock\n");
-					SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
-					error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
-				}
-				else if ($lockStat == -1) // error checking
-				{
-					SVNDoNotEdit({$svnFile}, 15);
-					error("could not check subversion lock status");
-				}
-			}
-			else
-			{
-				dprint ("// it's NOT in repository\n");
-			}
-		}
-		else
-		{
-			// do the normal thing
-			SVNBeforeOpen();
-		}
-	}
+                                                        // check if it's the same as the file the user chose
+                                                        if (!SVNFilesAreSame($svnFile, $sceneFile))
+                                                        {
+                                                                int $result = SVN2OptionDialog({$svnFile, $sceneFile, $SVN_LASTEDITEDBY}, 30, 31, 9, "question");
+                                                                if ($result == 1)
+                                                                {
+                                                                        // we need to copy the new file somewhere and load it
+                                                                        $SVN_FILE_SELECTED = "";
+                                                                        //fileBrowserDialog -m 1 -fc "SVNSetSelectedFile" -ft "mayaBinary" -an "Save Newest File" -tm "SaveAs";
+                                                                        string $cmd = "mayaSvn -fsd -title \"Save As\" -filter \"Maya Files|*.mb;*.ma\" -extension \"mb\" -fileName \"" + $sceneFile + "\"";
+                                                                        $SVN_FILE_SELECTED = `eval ($cmd)`;
+                                                                        if (size ($SVN_FILE_SELECTED) == 0)
+                                                                        {
+                                                                                SVNReleaseLock($svnFile);
+                                                                                SVNDoNotEdit({$svnFile}, 1);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                                // copy the newest file local
+                                                                                if (!(`sysFile -copy $SVN_FILE_SELECTED $svnFile`))
+                                                                                {
+                                                                                        SVNReleaseLock($svnFile);
+                                                                                        SVNDoNotEdit({$SVN_FILE_SELECTED}, 2);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                        $SVN_LOAD_STATE = 1;    // loading new file but we need to load this file!
+                                                                                        $SVN_FILE_TO_LOAD = $SVN_FILE_SELECTED;
+                                                                                }
+                                                                        }
+                                                                }
+                                                                else
+                                                                {
+                                                                        SVNReleaseLock($svnFile);
+                                                                        SVNDoNotEdit({$svnFile}, 1);
+                                                                }
+                                                        }
+                                                        else
+                                                        {
+                                                                dprint ("// files are the same, no need to copy\n");
+                                                                $SVN_LOAD_STATE = 2; // check the textures after load
+                                                        }
+                                                }
+                                                else
+                                                {
+                                                        // could not get the lock
+                                                        SVNDoNotEdit({$svnFile}, 3);
+                                                }
+                                        }
+                                        else
+                                        {
+                                                // tell them they are NOT to edit it
+                                                SVNDoNotEdit({$svnFile}, 4);
+                                        }
+                                }
+                                else if ($lockStat == 1) // already have the lock
+                                {
+                                        dprint ("// good: you already have the lock\n");
+                                        $SVN_LOAD_STATE = 2; // check the textures after load
+                                }
+                                else if ($lockStat == 2) // someone else has the lock
+                                {
+                                        dprint ("// someone else (" + $SVN_LOCKEDBY + ") has the lock\n");
+                                        SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
+                                        error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
+                                }
+                                else if ($lockStat == -1) // error checking
+                                {
+                                        SVNDoNotEdit({$svnFile}, 15);
+                                        error("could not check subversion lock status");
+                                }
+                        }
+                        else
+                        {
+                                dprint ("// it's NOT in repository\n");
+                        }
+                }
+                else
+                {
+                        // do the normal thing
+                        SVNBeforeOpen();
+                }
+        }
 }
 
 proc int PathExcluded (string $path)
 {
-	global string $SVN_LOCAL_TEXPATH_EXCLUSIONS[];
+        global string $SVN_LOCAL_TEXPATH_EXCLUSIONS[];
 
-	for ($excl in $SVN_LOCAL_TEXPATH_EXCLUSIONS)
-	{
-		if (gmatch($path, $excl))
-		{
-			return 1;
-		}
-	}
+        for ($excl in $SVN_LOCAL_TEXPATH_EXCLUSIONS)
+        {
+                if (gmatch($path, $excl))
+                {
+                        return 1;
+                }
+        }
 
-	return 0;
+        return 0;
 }
 
 proc int ValidImageExtension(string $filename)
 {
-	if (gmatch($filename, "*.*"))
-	{
-		string $ext = fileExtension($filename);
-		if (size($ext) >= 2)
-		{
-			$ext = tolower($ext);
-			return (
-			     $ext == "tga"
-			 ||  $ext == "tm2"
-			 );
-		}
-	}
-	return 0;
+        if (gmatch($filename, "*.*"))
+        {
+                string $ext = fileExtension($filename);
+                if (size($ext) >= 2)
+                {
+                        $ext = tolower($ext);
+                        return (
+                             $ext == "tga"
+                         ||  $ext == "tm2"
+                         );
+                }
+        }
+        return 0;
 }
 
 global proc SVNAfterOpenLocal ()
 {
-	global int $SVN_LOAD_STATE;
-	global string $SVN_FILE_TO_LOAD;
-	global string $SVN_ORIG_SCENEFILE;
+        global int $SVN_LOAD_STATE;
+        global string $SVN_FILE_TO_LOAD;
+        global string $SVN_ORIG_SCENEFILE;
 
-	if ($SVN_LOAD_STATE == 1)	// just loaded user selected file
-	{
-		dprint ("// loading scene we just saved\n");
-		$SVN_LOAD_STATE = 2;
+        if ($SVN_LOAD_STATE == 1)       // just loaded user selected file
+        {
+                dprint ("// loading scene we just saved\n");
+                $SVN_LOAD_STATE = 2;
 
-		string $scenePath = dirname($SVN_FILE_TO_LOAD);
-		string $sceneBase = dirname($scenePath);
+                string $scenePath = dirname($SVN_FILE_TO_LOAD);
+                string $sceneBase = dirname($scenePath);
 
-		string $sourceimagePath = $sceneBase + "/sourceimages";
+                string $sourceimagePath = $sceneBase + "/sourceimages";
 
-		string $scenePathName = basename($scenePath, "");
-		if (tolower($scenePathName) == "scenes")
-		{
-			setProject $sceneBase;
-			print ("// set project to " + $sceneBase + "\n");
-		}
+                string $scenePathName = basename($scenePath, "");
+                if (tolower($scenePathName) == "scenes")
+                {
+                        setProject $sceneBase;
+                        print ("// set project to " + $sceneBase + "\n");
+                }
 
-		file -o $SVN_FILE_TO_LOAD;
-	}
-	else if ($SVN_LOAD_STATE == 2) // the file was in subversion and we've loaded it one way or another
-	{
-		dprint ("// check textures\n");
-		$SVN_LOAD_STATE = 0;
+                file -o $SVN_FILE_TO_LOAD;
+        }
+        else if ($SVN_LOAD_STATE == 2) // the file was in subversion and we've loaded it one way or another
+        {
+                dprint ("// check textures\n");
+                $SVN_LOAD_STATE = 0;
 
-		string $sceneFile = `file -q -expandName -sceneName`;
-		string $scenePath = dirname($sceneFile);
-		string $sceneBase = dirname($scenePath);
+                string $sceneFile = `file -q -expandName -sceneName`;
+                string $scenePath = dirname($sceneFile);
+                string $sceneBase = dirname($scenePath);
 
-		string $sourceimagePath = $sceneBase + "/sourceimages";
+                string $sourceimagePath = $sceneBase + "/sourceimages";
 
-		string $svnScenePath     = dirname($SVN_ORIG_SCENEFILE);
-		string $svnSceneBase     = dirname($svnScenePath);
-		string $svnSourceImgPath = $svnSceneBase + "/sourceimages";
+                string $svnScenePath     = dirname($SVN_ORIG_SCENEFILE);
+                string $svnSceneBase     = dirname($svnScenePath);
+                string $svnSourceImgPath = $svnSceneBase + "/sourceimages";
 
-		string $flistpath = Mayaify($svnSourceImgPath) + "/";
+                string $flistpath = Mayaify($svnSourceImgPath) + "/";
 
-		dprint ("// flistpath = " + $flistpath + "\n");
+                dprint ("// flistpath = " + $flistpath + "\n");
 
-		string $files[] = `getFileList -fld $flistpath`;
-		string $file;
-		string $srcFiles[];		// files we will copy from
-		string $dstFiles[];		// files we will copy to
-		string $overFiles = "";
+                string $files[] = `getFileList -fld $flistpath`;
+                string $file;
+                string $srcFiles[];             // files we will copy from
+                string $dstFiles[];             // files we will copy to
+                string $overFiles = "";
 
-		for ($file in $files)
-		{
-			if (ValidImageExtension($file) && !PathExcluded($file))
-			{
-				dprint ("// checking texture " + $file + "\n");
+                for ($file in $files)
+                {
+                        if (ValidImageExtension($file) && !PathExcluded($file))
+                        {
+                                dprint ("// checking texture " + $file + "\n");
 
-				string $origPath = $svnSourceImgPath + "/" + basename($file, "");
-				string $destPath = $sourceimagePath + "/" + basename($file, "");
+                                string $origPath = $svnSourceImgPath + "/" + basename($file, "");
+                                string $destPath = $sourceimagePath + "/" + basename($file, "");
 
-				int $copy = 0;
+                                int $copy = 0;
 
-				if (!(`file -q -ex $destPath`))
-				{
-					$copy = 1;
-				}
-				else
-				{
-					if (!SVNFilesAreSame($origPath, $destPath))
-					{
-						$copy = 1;
-						$overFiles = $overFiles + $destPath + " : " + SVNFormat(32, {SVNLastEditedBy($origPath)}) + "\n";
-					}
-				}
+                                if (!(`file -q -ex $destPath`))
+                                {
+                                        $copy = 1;
+                                }
+                                else
+                                {
+                                        if (!SVNFilesAreSame($origPath, $destPath))
+                                        {
+                                                $copy = 1;
+                                                $overFiles = $overFiles + $destPath + " : " + SVNFormat(32, {SVNLastEditedBy($origPath)}) + "\n";
+                                        }
+                                }
 
-				if ($copy)
-				{
-					$srcFiles[size($srcFiles)] = $origPath;
-					$dstFiles[size($dstFiles)] = $destPath;
-				}
-			}
-			else
-			{
-				dprint ("// skipping excluded texture " + $file + "\n");
-			}
-		}
+                                if ($copy)
+                                {
+                                        $srcFiles[size($srcFiles)] = $origPath;
+                                        $dstFiles[size($dstFiles)] = $destPath;
+                                }
+                        }
+                        else
+                        {
+                                dprint ("// skipping excluded texture " + $file + "\n");
+                        }
+                }
 
-		// if there are any files to copy
-		if (size($srcFiles) > 0)
-		{
-			int $result = 1;
+                // if there are any files to copy
+                if (size($srcFiles) > 0)
+                {
+                        int $result = 1;
 
-			// if there are any files about to be overwritten get permission
-			if (size($overFiles) > 0)
-			{
-				int $result = SVN2OptionDialog({$overFiles}, 11, 12, 9, "question");
-			}
+                        // if there are any files about to be overwritten get permission
+                        if (size($overFiles) > 0)
+                        {
+                                int $result = SVN2OptionDialog({$overFiles}, 11, 12, 9, "question");
+                        }
 
-			if ($result == 1)
-			{
-				int $ii;
+                        if ($result == 1)
+                        {
+                                int $ii;
 
-				for ($ii = 0; $ii < size($srcFiles); $ii++)
-				{
-					string $srcFile = $srcFiles[$ii];
-					string $dstFile = $dstFiles[$ii];
+                                for ($ii = 0; $ii < size($srcFiles); $ii++)
+                                {
+                                        string $srcFile = $srcFiles[$ii];
+                                        string $dstFile = $dstFiles[$ii];
 
-					if (!(`sysFile -copy $dstFile $srcFile`))
-					{
-						// tell them they are NOT to edit it
-						SVNReleaseLock($SVN_ORIG_SCENEFILE);
-						SVNDoNotEdit({$SVN_ORIG_SCENEFILE, $dstFile}, 5);
-						break;
-					}
-				}
-			}
-			else
-			{
-				// tell them they are NOT to edit it
-				SVNReleaseLock($SVN_ORIG_SCENEFILE);
-				SVNDoNotEdit({$SVN_ORIG_SCENEFILE}, 6);
-			}
-		}
-	}
-	else
-	{
-		dprint ("// AfterLoad do nothing\n");
-	}
+                                        if (!(`sysFile -copy $dstFile $srcFile`))
+                                        {
+                                                // tell them they are NOT to edit it
+                                                SVNReleaseLock($SVN_ORIG_SCENEFILE);
+                                                SVNDoNotEdit({$SVN_ORIG_SCENEFILE, $dstFile}, 5);
+                                                break;
+                                        }
+                                }
+                        }
+                        else
+                        {
+                                // tell them they are NOT to edit it
+                                SVNReleaseLock($SVN_ORIG_SCENEFILE);
+                                SVNDoNotEdit({$SVN_ORIG_SCENEFILE}, 6);
+                        }
+                }
+        }
+        else
+        {
+                dprint ("// AfterLoad do nothing\n");
+        }
 }
 
 /*************************************************************************
                                SVNCheckin
  *************************************************************************/
 /**
-	@brief  Check in a scene and update its textures
+        @brief  Check in a scene and update its textures
 
 
 
 
-	@see
+        @see
 
-	@author 09/27/05 GAT: Created.
+        @author 09/27/05 GAT: Created.
 
 */
 /* ----------------------------------------------------------------------- */
 
 global proc SVNCheckinOrAdd ()
 {
-	global string $SVN_LOCAL_PROJECT_PATHS[];
+        global string $SVN_LOCAL_PROJECT_PATHS[];
 
-	string $sceneFile = `file -q -expandName -sceneName`;
-	string $scenePath = dirname($sceneFile);
-	string $sceneBase = dirname($scenePath);
+        string $sceneFile = `file -q -expandName -sceneName`;
+        string $scenePath = dirname($sceneFile);
+        string $sceneBase = dirname($scenePath);
 
-	string $svnFile = SVNFileInProjectPaths($sceneFile);
+        string $svnFile = SVNFileInProjectPaths($sceneFile);
 
-	int $commit = 0;
-	int $copy   = 0;
+        int $commit = 0;
+        int $copy   = 0;
 
-	if (size($svnFile) && SVNIsInRepository($svnFile))
-	{
-		int $lockStat = SVNLockStatus($svnFile);
-		if ($lockStat != 1)
-		{
-			SVNDoNotEdit({$sceneFile}, 4);
-		}
-		else
-		{
-			$copy = 1;
-		}
-	}
-	else
-	{
-		// for now assume the first project path :-(
-		if (size($SVN_LOCAL_PROJECT_PATHS) == 0)
-		{
-			SVNErrorPrompt({},28);
-		}
-		else
-		{
-			string $svnFile = SVNSceneFileToProjectPath($SVN_LOCAL_PROJECT_PATHS[0], $sceneFile);
+        if (size($svnFile) && SVNIsInRepository($svnFile))
+        {
+                int $lockStat = SVNLockStatus($svnFile);
+                if ($lockStat != 1)
+                {
+                        SVNDoNotEdit({$sceneFile}, 4);
+                }
+                else
+                {
+                        $copy = 1;
+                }
+        }
+        else
+        {
+                // for now assume the first project path :-(
+                if (size($SVN_LOCAL_PROJECT_PATHS) == 0)
+                {
+                        SVNErrorPrompt({},28);
+                }
+                else
+                {
+                        string $svnFile = SVNSceneFileToProjectPath($SVN_LOCAL_PROJECT_PATHS[0], $sceneFile);
 
-			string $svnScenePath     = dirname($svnFile);
-			string $svnSceneBase     = dirname($svnScenePath);
-			string $svnSourceImgPath = $svnSceneBase + "/sourceimages";
+                        string $svnScenePath     = dirname($svnFile);
+                        string $svnSceneBase     = dirname($svnScenePath);
+                        string $svnSourceImgPath = $svnSceneBase + "/sourceimages";
 
-			if (!(`sysFile -makeDir $svnSceneBase`) ||
-				!(`sysFile -makeDir $svnScenePath`) ||
-				!(`sysFile -makeDir $svnSourceImgPath`) )
-			{
-				SVNErrorPrompt({$svnFile}, 29);
-			}
-			else
-			{
-				$copy = 1;
-			}
-		}
-	}
+                        if (!(`sysFile -makeDir $svnSceneBase`) ||
+                                !(`sysFile -makeDir $svnScenePath`) ||
+                                !(`sysFile -makeDir $svnSourceImgPath`) )
+                        {
+                                SVNErrorPrompt({$svnFile}, 29);
+                        }
+                        else
+                        {
+                                $copy = 1;
+                        }
+                }
+        }
 
-	// copy scene and textures
-	if ($copy)
-	{
-		if (!(`sysFile -copy $svnFile $sceneFile`))
-		{
-			SVNDoNotEdit({$svnFile}, 2);
-		}
-		else
-		{
-			$commit = 1;
-		}
-	}
+        // copy scene and textures
+        if ($copy)
+        {
+                if (!(`sysFile -copy $svnFile $sceneFile`))
+                {
+                        SVNDoNotEdit({$svnFile}, 2);
+                }
+                else
+                {
+                        $commit = 1;
+                }
+        }
 }
 
 
@@ -1079,194 +1084,194 @@ global proc SVNCheckinOrAdd ()
                               SVNBeforeOpen
  *************************************************************************/
 /**
-	@brief  Get Lock before opening file
+        @brief  Get Lock before opening file
 
 
 
 
-	@return
+        @return
 
-	@see
+        @see
 
-	@author 09/26/05 GAT: Created.
+        @author 09/26/05 GAT: Created.
 
 */
 /* ----------------------------------------------------------------------- */
 
 global proc SVNBeforeOpen ()
 {
-	global string $SVN_LOCKEDBY;
+        global string $SVN_LOCKEDBY;
 
-	// check if this file is in subversion
-	// if in SVN you must lock it
-	string $svnFile = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
-	dprint ("// about to open (" + $svnFile + ")\n");
-	if (SVNIsInRepository($svnFile))
-	{
-		dprint ("// it's in repository\n");
-		int $lockStat = SVNLockStatus($svnFile);
-		if ($lockStat == 0) // unlocked
-		{
-			dprint ("// it's unlocked\n");
-			// do you want to lock the file
-			int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
-			if ($result == 1)
-			{
-				dprint ("// getting lock\n");
-				if (SVNGetLock($svnFile, ""))
-				{
-					print ("// good: got the lock\n");
-				}
-				else
-				{
-					SVNDoNotEdit({$svnFile}, 3);
-				}
-			}
-			else
-			{
-				// tell them they are NOT to edit it
-				SVNDoNotEdit({$svnFile}, 4);
-			}
-		}
-		else if ($lockStat == 1) // already have the lock
-		{
-			dprint ("// good: you already have the lock\n");
-		}
-		else if ($lockStat == 2) // someone else has the lock
-		{
-			dprint ("// someone else has the lock\n");
-			SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
-			error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
-		}
-		else if ($lockStat == -1) // error checking
-		{
-			SVNDoNotEdit({$svnFile}, 15);
-			error("could not check subversion lock status");
-		}
-	}
-	else
-	{
-		dprint ("// it's NOT in repository\n");
-	}
+        // check if this file is in subversion
+        // if in SVN you must lock it
+        string $svnFile = `eval mayaSvn -gf "\"beforeOpenFilename\""`;
+        dprint ("// about to open (" + $svnFile + ")\n");
+        if (SVNIsInRepository($svnFile))
+        {
+                dprint ("// it's in repository\n");
+                int $lockStat = SVNLockStatus($svnFile);
+                if ($lockStat == 0) // unlocked
+                {
+                        dprint ("// it's unlocked\n");
+                        // do you want to lock the file
+                        int $result = SVN2OptionDialog({$svnFile}, 10, 8, 9, "question");
+                        if ($result == 1)
+                        {
+                                dprint ("// getting lock\n");
+                                if (SVNGetLock($svnFile, ""))
+                                {
+                                        print ("// good: got the lock\n");
+                                }
+                                else
+                                {
+                                        SVNDoNotEdit({$svnFile}, 3);
+                                }
+                        }
+                        else
+                        {
+                                // tell them they are NOT to edit it
+                                SVNDoNotEdit({$svnFile}, 4);
+                        }
+                }
+                else if ($lockStat == 1) // already have the lock
+                {
+                        dprint ("// good: you already have the lock\n");
+                }
+                else if ($lockStat == 2) // someone else has the lock
+                {
+                        dprint ("// someone else has the lock\n");
+                        SVNDoNotEdit({$svnFile, $SVN_LOCKEDBY}, 14);
+                        error("you should not edit this file.  It is already loccked by " + $SVN_LOCKEDBY);
+                }
+                else if ($lockStat == -1) // error checking
+                {
+                        SVNDoNotEdit({$svnFile}, 15);
+                        error("could not check subversion lock status");
+                }
+        }
+        else
+        {
+                dprint ("// it's NOT in repository\n");
+        }
 }
 
 global proc SVNAfterSave()
 {
-	// check if this file is in subversion
-	string $sceneFile = `file -q -expandName -sceneName`;
-	int $canLock = 0;
-	dprint ("// just saved (" + $sceneFile + ")\n");
+        // check if this file is in subversion
+        string $sceneFile = `file -q -expandName -sceneName`;
+        int $canLock = 0;
+        dprint ("// just saved (" + $sceneFile + ")\n");
 
-	if (SVNIsInRepository($sceneFile))
-	{
-		// do we want to commit it
-		int $result = SVN2OptionDialog({$sceneFile}, 16, 17, 9, "question");
-		if ($result == 1)
-		{
-			string $res[] = SVNGetText({$sceneFile}, 24, 17, 25);
-			if ($res[0] == "1")
-			{
-				string $comment = $res[1];
-				if (!SVNCommit($sceneFile, $comment))
-				{
-					SVNErrorPrompt({$sceneFile}, 18);
-				}
-				else
-				{
-					$canLock = 1;
-				}
-			}
-		}
-	}
-	else
-	{
-		// is it's folder in the repository
-		string $folder = dirname($sceneFile);
-		if (SVNIsInRepository($folder))
-		{
-			// do we want to add it
-			int $result = SVN2OptionDialog({$sceneFile}, 19, 20, 9, "question");
-			if ($result == 1)
-			{
-				string $res[] = SVNGetText({$sceneFile}, 24, 20, 25);
-				if ($res[0] == "1")
-				{
-					string $comment = $res[1];
-					if (!SVNAdd($sceneFile))
-					{
-						SVNErrorPrompt({$sceneFile}, 21);
-					}
-					else
-					{
-						if (!SVNCommit($sceneFile, $comment))
-						{
-							SVNErrorPrompt({$sceneFile}, 18);
-						}
-						else
-						{
-							$canLock = 1;
-						}
-					}
-				}
-			}
-		}
-	}
+        if (SVNIsInRepository($sceneFile))
+        {
+                // do we want to commit it
+                int $result = SVN2OptionDialog({$sceneFile}, 16, 17, 9, "question");
+                if ($result == 1)
+                {
+                        string $res[] = SVNGetText({$sceneFile}, 24, 17, 25);
+                        if ($res[0] == "1")
+                        {
+                                string $comment = $res[1];
+                                if (!SVNCommit($sceneFile, $comment))
+                                {
+                                        SVNErrorPrompt({$sceneFile}, 18);
+                                }
+                                else
+                                {
+                                        $canLock = 1;
+                                }
+                        }
+                }
+        }
+        else
+        {
+                // is it's folder in the repository
+                string $folder = dirname($sceneFile);
+                if (SVNIsInRepository($folder))
+                {
+                        // do we want to add it
+                        int $result = SVN2OptionDialog({$sceneFile}, 19, 20, 9, "question");
+                        if ($result == 1)
+                        {
+                                string $res[] = SVNGetText({$sceneFile}, 24, 20, 25);
+                                if ($res[0] == "1")
+                                {
+                                        string $comment = $res[1];
+                                        if (!SVNAdd($sceneFile))
+                                        {
+                                                SVNErrorPrompt({$sceneFile}, 21);
+                                        }
+                                        else
+                                        {
+                                                if (!SVNCommit($sceneFile, $comment))
+                                                {
+                                                        SVNErrorPrompt({$sceneFile}, 18);
+                                                }
+                                                else
+                                                {
+                                                        $canLock = 1;
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
 
-	if ($canLock)
-	{
-   		int $result = SVN2OptionDialog({$sceneFile}, 22, 23, 9, "question");
-		if ($result == 1)
-		{
-			if (!SVNGetLock($sceneFile, ""))
-			{
-				// tell them they are NOT to edit it
-				SVNDoNotEdit({$sceneFile}, 3);
-			}
-		}
-		else
-		{
-			// tell them they are NOT to edit it
-			SVNDoNotEdit({$sceneFile}, 4);
-		}
-	}
+        if ($canLock)
+        {
+                int $result = SVN2OptionDialog({$sceneFile}, 22, 23, 9, "question");
+                if ($result == 1)
+                {
+                        if (!SVNGetLock($sceneFile, ""))
+                        {
+                                // tell them they are NOT to edit it
+                                SVNDoNotEdit({$sceneFile}, 3);
+                        }
+                }
+                else
+                {
+                        // tell them they are NOT to edit it
+                        SVNDoNotEdit({$sceneFile}, 4);
+                }
+        }
 }
 
 global proc SVNDebug()
 {
-	global int $SVN_DEBUG;
+        global int $SVN_DEBUG;
 
-	$SVN_DEBUG = 1;
+        $SVN_DEBUG = 1;
 }
 
 global proc SVNSetup(int $mode)
 {
-	if (!(`about -batch`))
-	{
-		SVNSetPath("");
+        if (!(`about -batch`))
+        {
+                SVNSetPath("");
 
-		print ("// Setting up SVNMaya\n");
+                print ("// Setting up SVNMaya\n");
 
-		// we do it this way because if the plugin is not loaded at load time
-		// then these scripts won't know about the mayaSvn command.  We could
-		// force the user to add the plugin to their list of plugins in prefs
-		// but I'd rather manually load it in the start up scripts, then they
-		// don't have to do any work.
+                // we do it this way because if the plugin is not loaded at load time
+                // then these scripts won't know about the mayaSvn command.  We could
+                // force the user to add the plugin to their list of plugins in prefs
+                // but I'd rather manually load it in the start up scripts, then they
+                // don't have to do any work.
 
-		if ($mode == 2)
-		{
-			eval mayaSvn -ae "\"BeforeOpen\"" -sn "\"_svnBeforeOpen\"" -m "\"eval SVNBeforeOpenLocal\"";
-			eval mayaSvn -ae "\"AfterOpen\"" -sn "\"_svnBeforeOpen\"" -m "\"eval SVNAfterOpenLocal\"";
-			eval mayaSvn -ae "\"AfterSave\"" -sn "\"svnAfterSave\"" -m "\"eval SVNAfterSave\"";
-		}
-		else if ($mode == 1)
-		{
-		//	eval mayaSvn -ae "\"BeforeOpenCheck\"" -sn "\"svnBeforeOpenCheck\"" -m "\"eval SVNBeforeOpenCheck\"";
-			eval mayaSvn -ae "\"BeforeOpen\"" -sn "\"svnBeforeOpen\"" -m "\"eval SVNBeforeOpen\"";
-			eval mayaSvn -ae "\"AfterSave\"" -sn "\"svnAfterSave\"" -m "\"eval SVNAfterSave\"";
-		}
-		else
-		{
-			error ("unknown mode " + $mode + " for SVNSetup\n");
-		}
-	}
+                if ($mode == 2)
+                {
+                        eval mayaSvn -ae "\"BeforeOpen\"" -sn "\"_svnBeforeOpen\"" -m "\"eval SVNBeforeOpenLocal\"";
+                        eval mayaSvn -ae "\"AfterOpen\"" -sn "\"_svnBeforeOpen\"" -m "\"eval SVNAfterOpenLocal\"";
+                        eval mayaSvn -ae "\"AfterSave\"" -sn "\"svnAfterSave\"" -m "\"eval SVNAfterSave\"";
+                }
+                else if ($mode == 1)
+                {
+                //      eval mayaSvn -ae "\"BeforeOpenCheck\"" -sn "\"svnBeforeOpenCheck\"" -m "\"eval SVNBeforeOpenCheck\"";
+                        eval mayaSvn -ae "\"BeforeOpen\"" -sn "\"svnBeforeOpen\"" -m "\"eval SVNBeforeOpen\"";
+                        eval mayaSvn -ae "\"AfterSave\"" -sn "\"svnAfterSave\"" -m "\"eval SVNAfterSave\"";
+                }
+                else
+                {
+                        error ("unknown mode " + $mode + " for SVNSetup\n");
+                }
+        }
 }
