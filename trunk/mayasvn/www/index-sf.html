@@ -356,6 +356,15 @@ global proc string TranslateUserID (string $userid)
 <pre>
         SVNSetUserIDCallback("TranslateUserID");
 </PRE>
+<h2>Bonus!</H2>
+<p>mayasvn is nearly 100% mel.  The only Maya API part is the mayasvn.mll plugin.  All it does is allow you to connect mel scripts to certain events in maya.  BeforeSave, AfterOpen, etc.  So here is a script that came in useful
+<a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/mayasvn/mayasvn/bonus/FixTexturePaths.mel">FixTexturePaths.mel</A>.  You can attach it to the AfterOpen event with the following line</P>
+<pre>
+eval mayaSvn -ae "\"AfterOpen\"" -sn "\"myAfterOpenScript\"" -m "\"eval FixTexturePaths\"";
+</PRE>
+<p>What it does is just after a maya loads a scene file it sets the Maya Project.  In other words, if you keep your files organzied the maya way with a base folder and inside a scenes and sourceimages folder then instead of having to set the project before you open the file you can just open the file and your project will be set automatically. (that should probably happen in BeforeOpen but for now it's in AfterOpen).</P>
+<p>After that it goes through every file texture and checks to see if it exists in <span class="fname">&lt;currentproject&gt;/sourceimages</SPAN>.  If it does it sets the path for that texture to the new path including making it project relative if possible.</P>
+<p>I suppose for completely organized teams this is not important but for my team it seemed like every time I tried to open a file the textures would not come up.  I used Crow Yeh's excellent <a href="http://www.highend3d.com/maya/downloads/mel_scripts/data_management/1012.html">FileTextureManager</A> to manually fix all the paths but with this that fix is now automated.</P>
 <h2>Sourceforge Project Page</H2>
 <p>The sourceforge project page is <a href="http://sourceforge.net/projects/mayasvn/">here</a> for source code and other participation</P>
 </DIV>
