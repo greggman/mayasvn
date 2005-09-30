@@ -1,0 +1,112 @@
+<html>
+<head>
+ <style type="text/css">
+/* <![CDATA[ */
+@import "http://www.tigris.org/branding/css/tigris.css";
+@import "http://www.tigris.org/branding/css/inst.css";
+/*  ]]> */
+ </style>
+  <link rel="stylesheet" type="text/css" href="http://www.tigris.org/branding/css/print.css" media="print" />
+<script src="http://www.tigris.org/branding/scripts/tigris.js" type="text/javascript">
+</script>
+ <title>Project Overview</title>
+</head>
+<body>
+<style>
+pre { background-color: #DDC; padding: 10px; border: 1px solid #663 ; }
+.fname { white-space: nowrap; font-weight: bold; }
+</STYLE>
+<p>This is a Maya Subversion integration system to make it easier for your team to use subversion to manage Maya assets</P>
+<h2>Important:</H2>
+<p>This is current only compiled for Maya 6.5.  If you have another version you'll have to download the source and re-compile.  It's also currently Windows only.  I don't use Maya on a OS X or under Linux, sorry.</p>
+<h2>usage:</H2>
+<p>Usage is straight forward.  Once installed if you attempt to open a maya file that is under subversion control you will be asked if you want to get a lock on the file.  If you answer yes mayasvn will attempt to lock the file.  If you answer no or if you choose not to lock the file you will be warned that you are not allowed to edit the file.</p>
+<p>When saving mayasvn will check if the file you are saving is under subversion control.  If it is you will be asked if you want to commit the file.  If it is not, mayasvn will check if the folder you are saving to is under subversion control.  If so you will be asked of you want to add the file to subversion.  In either case if you answer yes you are given the option to enter a comment and to then get the lock again so you can continue to work.</P>
+<h2>installation:</h2>
+<h3>Simple (non production) installation for testing</h3>
+<ol>
+<li>Make sure the subversion client files are installed and in your path. (ie, you should be able to type "svn help" from the command line</P>
+<li>Copy the <a href="http://mayasvn.tigris.org/source/browse/*checkout*/mayasvn/trunk/mayasvncmd/plugin/6.5/mayaSvn.mll">mayaSvn.mll</A> to the <span class="fname">X:\Program Files\Alias\Maya&lt;ver&gt;\bin\plug-ins</SPAN></P>
+<li>Copy <a href="http://mayasvn.tigris.org/source/browse/*checkout*/mayasvn/trunk/mayasvncmd/SVNSetup.mel">SVNSetup.mel</A> <span class="fname">My Documents\Maya\&lt;ver&gt;\scripts</SPAN></P>
+<li>Run Maya, Go to Window->Settings/Preferences->Plug-in Manager..., find mayaSvn.mll and check both "loaded" and "auto load"</P>
+<li>Next you need to add some code to your userSetup.mel file to enable it.  userSetup.mel is usually found in <span class="fname">My Documents\Maya\&lt;ver&gt;\scripts</SPAN>.  If it does not exist just create it.  Here is the simplest version</P>
+<pre>
+// -- userSetup.mel
+SVNSetup(1);
+</PRE>
+<p>That's it. If you now try to open or save a file that happens to be in a subversion controlled folder you should get asked the appropriate subversion related questions</P>
+    </OL>
+<h3>Production Installation (for team settings)</h3>
+<p>The point of this type of installation is so you can update things and your whole team can be brought up to date.</P>
+<ol><li>Install the subversion client files somewhere inside your subverison controlled project tree.  They do NOT have to be in your path.  This way you can update the team with a new version of the client if/when you need to.  For this example I'm going to assume <span class="fname">e:\work\projectx\tools\svn</span> where <span class="fname">e:\work\projectx</SPAN> is the root of the subversion controlled tree for this project.  Add it to subversion</P>
+<li>Copy the <a href="http://mayasvn.tigris.org/source/browse/*checkout*/mayasvn/trunk/mayasvncmd/plugin/6.5/mayaSvn.mll">mayaSvn.mll</A> to a subversion based folder somwhere inside your subversion controlled project tree.  In this example <span class="fname">e:\work\projectx\tools\maya\6.5\plugins\mayasvn.dll</SPAN>.  Add it to subversion</P>
+<li>Copy <a href="http://mayasvn.tigris.org/source/browse/*checkout*/mayasvn/trunk/mayasvncmd/SVNSetup.mel">SVNSetup.mel</A> in there as well.  <span class="fname">In this example e:\work\projectx\tools\maya\6.5\scripts</SPAN>.  Add it to subversion</P>
+<li>Set an environment variable (right click My Computer, pick the "Settings" tab and click on "Environment Variables".  Click "Add" and type "PROJECTX_BASE" for the name and "<span class="fname">E:\work\projectx</SPAN>" for the value. Click "OK", "OK", "OK.</P>
+<li>Edit your Maya.env file found in <span class="fname">My Documents\Maya\&lt;ver&gt;</SPAN>.  If it doesn't exist create it and put this code inside</p>
+<pre>
+MAYA_SCRIPT_PATH = %PROJECTX_BASE%\tools\maya\6.5\scripts\
+</pre>
+<p>that way Maya will look to our subversion controlled folder for scripts.
+<li>add code like this to your userSetup.mel file.  userSetup.mel is usually found in <span class="fname">My Documents\Maya\&lt;ver&gt;\scripts</SPAN>.  If it does not exist just create it.</P>
+<pre>
+// -- userSetup.mel
+ProjectXSetup;
+</PRE>
+<p>we do it this way because userSetup.mel is a local file and can't be easily managed from subversion but ProjectXSetup.mel can so lets have that do our real work and make that subversion controlled.</p>
+<li>create ProjectXSetup.mel in <span class="fname">e:\work\projectx\tools\maya\6.5\scripts</SPAN>.  Here's the contents</P>
+<pre>
+// ProjectXSetup.mel
+global proc ProjectXSetup()
+{
+    // don't enable it if we are in batch mode
+    if (!(`about -batch`))
+    {
+        string $base = `getenv "PROJECTX_BASE"`;
+        string $temp = `getenv "TMP"`;
+        string $localCopy = $temp + "/mayaSvn.mll";
+        string $svnCopy   = $base + "/tools/maya/6.5/plugins/mayaSvn.mll";
+
+        // we copy it local and use it there otherwise it will be locked
+        // and in use while maya is running making it impossible to update.
+        sysFile -copy $localCopy $svnCopy;
+
+        loadPlugin($localCopy);
+
+        SVNSetup(1);
+        // set the path to the svn client tools so it doesn't have to
+        // be in our OS "path"
+        SVNSetPath($base + "/tools/svn/bin");
+    }
+}
+</PRE>
+<li>Configure subversion to make .mb files need locks by default.  To do this edit the file <span class="fname">c:\documents and settings\&lt;user&gt;\Application Data\Subversion\config</SPAN>.</P>
+<p>Uncomment or add a line under the [miscellany] section</P>
+<pre>enable-auto-props = yes</PRE>
+<p>in the [auto-props] section add this line</P>
+<pre>*.mb = svn:needs-lock=*</PRE>
+<p>these lines make subversion actually make maya files read-only if you don't have the lock on them as well as require you to lock the file before you are allowed to commit.</P>
+    </OL>
+<h2>Notes - Comments:</H2>
+<p>I'm really loving subversion but I'd like to make a suggestion. The docs suggest that if you want to integrate subversion support into something you should use the C API.  They suggest this because you get more detailed info and control through the API than from calling the svn commandline client.  Unforunately the problem with using the C API is that it's a PAIN IN THE ASS.  Not because of any kind of poor design or anything like that, but setting it up can getting it to compile is alot more work than just calling the command line client.  On top of which everytime a bug is fixed in the API you've got to redownload the source and rebuild any tools you have with the new API.</P>
+
+<p>A much better solution IMO is if all the command line tools had the
+option to return consistant XML results then it would be much easier and
+safer to build integration based on the command line tools.  The advantage
+would be they are much easier to update, you can just install the new
+versions and you're done.  No need to have someone recompile custom
+integrations.  It appears there is some movement in that direction as
+there is the --xml flag for the svn command but so far it appears
+unsupported (as of version 1.2.3) I'd wouldn't mind making the changes
+myself, it really feels list it would be just a couple of hours of work
+but I don't feel like dealing with the politics of designing the perfect
+xml format because once the format is in place there should be no changing
+it.  I suppose as an option in that direction, you could request a specific version
+of the xml as in "--xml 1" for version 1 of the xml.  Hopefully there would be no need
+for a version 2 but it would allow programs expecting a version 1 result
+to just work.  Also cool is it would make it possible to do complex checkings, all kinds of files cross folders easier assuming you could pass in xml as well.
+Another issue is I'm not an XML guru so if I was to do it
+I'd not create a schema or a DTD but just sprew out some XML and hope for
+the best.  Still, I'd really like to see this option persued.  Right now
+the integration above is dependant on the result messages from the svn
+commandline client to not change which is clearly not a good thing.</P>
+</body></html>
