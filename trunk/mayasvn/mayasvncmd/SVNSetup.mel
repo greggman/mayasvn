@@ -572,11 +572,21 @@ global proc SVNSetTexpathExclusions(string $paths[])
 proc string SVNExecute(string $args)
 {
     global string $SVN_PATH;
+	string $path = "";
+
+	if (size($SVN_PATH) > 0)
+	{
+		string $svnBase = dirname($SVN_PATH);
+
+		putenv("APR_ICONV_PATH", toNativePath($svnBase + "/iconv"));
+
+		$path = $SVN_PATH + "/";
+	}
 
     // set to english so we can parse the errors
     putenv "LC_MESSAGES" "en";
 
-    string $cmd = $SVN_PATH + "/svn.exe " + $args;
+    string $cmd = $path + "svn.exe " + $args;
     string $result = `system($cmd)`;
 
     return $result;
@@ -759,7 +769,11 @@ global proc int SVNReleaseLock(string $filename)
 
 global proc int SVNCommit(string $filename, string $comment)
 {
+	string $cwd = pwd();
+	// subversion won't commit unless your current folder is the folder for the file we are commiting
+	chdir (dirname($filename));
     string $result = SVNExecute("commit \"" + $filename + "\" -m \"" + SVNencodeString($comment) + "\"");
+	chdir ($cwd);
     return (gmatch($result, "*Committed*"));
 }
 
