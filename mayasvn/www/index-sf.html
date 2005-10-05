@@ -109,13 +109,24 @@ global proc ProjectXSetup()
 
         // we copy it local and use it there otherwise it will be locked
         // and in use while maya is running making it impossible to update.
+
         sysFile -copy $localCopy $svnCopy;
 
         loadPlugin($localCopy);
 
         SVNSetup(1);
+
         // set the path to the svn client tools so it doesn't have to
-        // be in our OS "path"
+        // be in our OS "path".  Note: we assume the typical svn setup
+        //
+        // svn
+        //  +- bin
+        //  +- iconv
+        //  +- share
+        //
+        // and that you are passing in the path to the bin folder so we
+        // can find the iconv and share folders if needed
+
         SVNSetPath($base + "/tools/svn/bin");
     }
 }
@@ -340,6 +351,7 @@ global proc ProjectXSetup()
         SVNSetMessageCallback("MyCustomMessageFunc");
 </pre>
 <p>of course change "MyCustomMessageFunc" to whatever name you named your function.</P>
+<p>Note that it turns out the subversion svn command needs the APR_ICONV_PATH environment variable set in order to handle languages other than English.  If you have svn in your path and you used the installer to install it supposedly it sets that environment variable for you.  If it's not set and you are NOT calling SVNSetPath in your initalization then you'll need to set it.  If you are calling SVNSetPath then mayasvn will deal with it.</P>
 <h2>Username translation</H2>
 <p>There is another callback provided for username translation.  The issue was at my company our Windows user accounts are just employee numbers which is not very fun when mayasvn says user "s00321" has the lock on this file.  If you have such a system at your company you can provide a callback translation function something like this</p>
 <pre>
