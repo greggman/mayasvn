@@ -50,22 +50,6 @@ proc dprint(string $str)
     }
 }
 
-proc string Mayaify(string $path)
-{
-    string $parts[];
-    tokenize $path "\\" $parts;
-    string $newPath = stringArrayToString($parts, "/");
-    return $newPath;
-}
-
-proc string Winify(string $path)
-{
-    string $parts[];
-    tokenize $path "/" $parts;
-    string $newPath = stringArrayToString($parts, "\\");
-    return $newPath;
-}
-
 proc string EscapeBackslash(string $path)
 {
     string $parts[];
@@ -79,6 +63,9 @@ proc string EscapeBackslash(string $path)
  *************************************************************************/
 /**
     @brief  escape a string
+
+	mel's escapeString barfed when I passed it Japanese so I had to make
+	my own.
 
     @param  string $str
 
@@ -167,7 +154,7 @@ proc string GetBaseSVNName (string $path)
 
 proc int SVNFilesAreSame (string $file1, string $file2)
 {
-    string $cmd = "mayaSvn -cf \"" + EscapeBackslash(Winify($file1)) + "\" -file2 \"" + EscapeBackslash(Winify($file2)) + "\"";
+    string $cmd = "mayaSvn -cf \"" + EscapeBackslash(toNativePath($file1)) + "\" -file2 \"" + EscapeBackslash(toNativePath($file2)) + "\"";
     return (`eval($cmd)`);
 }
 
@@ -800,7 +787,7 @@ global proc int SVNAdd(string $filename)
     // svn add appears to return "A       c:\folder\filename" on success
     // so let's check if the filename we passed in matched the end of the string
 
-    string $winname = Winify($filename);
+    string $winname = toNativePath($filename);
     int $winsize = size($winname);
     int $ressize = size($result);
     if ($ressize > $winsize)
@@ -1215,7 +1202,17 @@ global proc SVNBeforeOpenLocal ()
                                 {
                                     // we need to copy the new file somewhere and load it
                                     $SVN_FILE_SELECTED = "";
-                                    //fileBrowserDialog -m 1 -fc "SVNSetSelectedFile" -ft "mayaBinary" -an "Save Newest File" -tm "SaveAs";
+
+                                    // fileBrowserDialog -m 1 -fc "SVNSetSelectedFile" -ft "mayaBinary" -an "Save Newest File" -tm "SaveAs";
+									//
+									// unfortunately, the fileBrowserDialog does not let me specify a default filename.
+									// Since the user is saving a file from SVN and since we are basically counting on them to
+									// use a similar name we NEED to provide that name for them.  On top of which the fileBrowserDialog
+									// does not let you specify a starting folder which is also important.  Our artists are generally
+									// going to want to save a file in the same project/scenes folder.  Making them hunt down the correct
+									// one would be asking for errors.  So, I made my own, unfortunately that means this is windows
+									// only unles someone updates mayaSvn to open file browser dialogs on other platforms.
+
                                     string $cmd = "mayaSvn -fsd -title \"Save As\" -filter \"Maya Files|*.mb;*.ma\" -extension \"mb\" -fileName \"" + $sceneFile + "\"";
                                     $SVN_FILE_SELECTED = `eval ($cmd)`;
                                     if (size ($SVN_FILE_SELECTED) == 0)
@@ -1436,7 +1433,7 @@ global proc SVNAfterOpenLocal ()
         string $svnSceneBase     = dirname($svnScenePath);
         string $svnSourceImgPath = $svnSceneBase + "/sourceimages";
 
-        string $flistpath = Mayaify($svnSourceImgPath) + "/";
+        string $flistpath = fromNativePath($svnSourceImgPath) + "/";
 
         dprint ("// flistpath = " + $flistpath + "\n");
 
