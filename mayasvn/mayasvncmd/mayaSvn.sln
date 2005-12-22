@@ -5,10 +5,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mayaSvn", "mayaSvn.vcproj",
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
+		7.0.Debug = 7.0.Debug
+		7.0.Release = 7.0.Release
 		Debug = Debug
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.7.0.Debug.ActiveCfg = 7.0.Debug|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.7.0.Debug.Build.0 = 7.0.Debug|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.7.0.Release.ActiveCfg = 7.0.Release|Win32
+		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.7.0.Release.Build.0 = 7.0.Release|Win32
 		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Debug.ActiveCfg = Debug|Win32
 		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Debug.Build.0 = Debug|Win32
 		{AACFDB2F-13EF-47B0-9C93-4DFEA8801B0C}.Release.ActiveCfg = Release|Win32
