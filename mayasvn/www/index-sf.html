@@ -218,9 +218,9 @@ objects(characters/etc).  Something like this</P>
       | +-sourceimages
       |   +-background.tga
       |   +-flower.tga
-      +-st lavalevel23
+      +-st_lavalevel23
         +-scenes
-        | +-st lavalevel23
+        | +-st_lavalevel23
         +-sourceimages
           +-lava.tga
           +-hotlavaanim001.tga
@@ -243,28 +243,28 @@ version.  We also update the folder tree, in this
 case "<span class="fname">svn update project\data\stages\stage_icelevel01</SPAN>" to
 make sure we have the current textures.  Then, we check if
 the mb file they clicked on (the one not in svn) matches
-the file in svn.  If not they are asked to select a place
+the file in svn.  If the files don't match they are asked to select a place
 to save the the svn file locally (because it's the most
 recent file).  After they pick a place to save it (they
 could just save on top of the file they original clicked
-on if they want) then copy the svn file there AND copy all
+on if they want) then we copy the svn file there AND copy all
 the textures in <span class="fname">project\data\stages\stage_icelevel01\sourceimages</SPAN> to whereever they saved the svn file in the
-corresponding soruceimages.  In otherwords, if they saved
+corresponding soruceimages folder.  In otherwords, if they saved
 the svn file to
 <span class="fname">e:\myworkspace\folder\scenes\stage_icelevel01_most_recent.mb</SPAN> then textures would get copied to
 <span class="fname">e:\myworkspace\folder\sourcefiles</SPAN>.  The textures, like
-the .mb file are check and are only copied if they are
+the .mb file are checked and are only copied if they are
 different and after warning the artist and giving them a
-change to abort.</P>
+chance to abort.</P>
 
 <p>Checking in follows a similar procedure.  They are editing
 <span class="fname">e:\myworkspace\folder\scenes\stage_icelevel01_tgs_images.mb</SPAN>
-They click "check in level" (an icon in Maya) and knowing
+They click "check in level" (an icon to a custom script in Maya) and knowing
 the file is a level it knows to put it in
 <span class="fname">project\data\stages\stage_icelevel01\scenes</SPAN> and the
 textures in <span class="fname">project\data\stages\stage_icelevel01\sourceimages</SPAN>.</P>
 
-<p>After checking in the get the option to keep the lock.</P>
+<p>After checking in they get the option to keep the lock.</P>
 
 <p>This basically lets them work as they always have but
 hopefully still does content management.</P>
@@ -276,7 +276,7 @@ tied to our environment.  I've made it so you can pass in
 a list of project folders.  In the case above you'd pass
 in <span class="fname">project\data\stages and project\data\objects</SPAN> so it can
 find stuff.  That kind of works for checking out and
-checking it, it doesn't work for adding though since
+checking in.  It doesn't work for adding though since
 mayasvn doesn't know whether to add to stages or objects.
 I suppose I could ask.
 
@@ -303,7 +303,7 @@ not always.
 </UL>
 <p>Any thoughts.  Should I have just forced my artist to use
 the first solution?</P>
-<p>75% of that solution is already checked in.  Instead of calling SVNSetup(1); like above you do it more like this</p>
+<p>75% of this solution is already checked in.  Instead of calling SVNSetup(1); like above you do it more like this</p>
 <pre>
 // ProjectXSetup.mel
 global proc ProjectXSetup()
