@@ -33,7 +33,7 @@ struct ltstr
 {
   bool operator()(const string& s1, const string& s2) const
   {
-    return stricmp(s1.c_str(), s2.c_str()) < 0;
+    return _stricmp(s1.c_str(), s2.c_str()) < 0;
   }
 };
 
@@ -196,7 +196,7 @@ mayaSvn::MsgInfo* mayaSvn::findMsgInfo(const MString& eventLabel)
 {
 	for (int ii = 0; ii < NUM_TABLE_ELEMENTS(msgInfos); ++ii)
 	{
-		if (!stricmp(msgInfos[ii].pLabel + 1, eventLabel.asChar()))
+		if (!_stricmp(msgInfos[ii].pLabel + 1, eventLabel.asChar()))
 		{
 			return &msgInfos[ii];
 		}
@@ -236,12 +236,12 @@ void mayaSvn::callbackCheckStub(bool* retCode, void* clientdata)
 
 void mayaSvn::handleCallback(const MsgInfo& mi)
 {
-	dbgPrintf ("executing scripts for event \"%s\"", mi.pLabel + 1);
+	dbgPrintf ("executing scripts for event \"%s\"\n", mi.pLabel + 1);
 	for (MelMap::const_iterator it = mi.melScripts.begin(); it != mi.melScripts.end(); ++it)
 	{
 		const MelInfo& mel = it->second;
-		dbgPrintf ("executing script \"%s\" for event \"%s\"", it->first.c_str(), mi.pLabel + 1);
-		dbgPrintf (mel._melScript.asChar());
+		dbgPrintf ("executing script \"%s\" for event \"%s\"\n", it->first.c_str(), mi.pLabel + 1);
+		dbgPrintf ("%s\n", mel._melScript.asChar());
 		MGlobal::executeCommand(mel._melScript, mel._bDisplayEnabled, mel._bUndoEnabled);
 	}
 	fflush(stdout);
@@ -249,13 +249,13 @@ void mayaSvn::handleCallback(const MsgInfo& mi)
 
 bool mayaSvn::handleCheckCallback(const MsgInfo& mi)
 {
-	dbgPrintf ("executing check scripts for event \"%s\"", mi.pLabel + 1);
+	dbgPrintf ("executing check scripts for event \"%s\"\n", mi.pLabel + 1);
 	for (MelMap::const_iterator it = mi.melScripts.begin(); it != mi.melScripts.end(); ++it)
 	{
 		const MelInfo& mel = it->second;
 		int result;
-		dbgPrintf ("executing script \"%s\" for event \"%s\"", it->first.c_str(), mi.pLabel + 1);
-		dbgPrintf (mel._melScript.asChar());
+		dbgPrintf ("executing script \"%s\" for event \"%s\"\n", it->first.c_str(), mi.pLabel + 1);
+		dbgPrintf ("%s\n", mel._melScript.asChar());
 		MGlobal::executeCommand(mel._melScript, result, mel._bDisplayEnabled, mel._bUndoEnabled);
 		if (!result)
 		{
@@ -281,7 +281,9 @@ MString escape (const MString& str)
 	unsigned len  = str.length();
 	const char* lastOk = str.asChar();
 
-	for (const char* s = lastOk; *s; ++s)
+	const char* s;
+
+	for (s = lastOk; *s; ++s)
 	{
 		char c = *s;
 		if (c == '\\')
@@ -319,7 +321,7 @@ bool mayaSvn::listScripts(const MString& eventLabel, MStringArray& scripts)
 	MsgInfo* pInfo = findMsgInfo(eventLabel);
 	if (!pInfo)
 	{
-		errPrintf ("unknown event \"%s\"", eventLabel.asChar());
+		errPrintf ("unknown event \"%s\"\n", eventLabel.asChar());
 		return false;
 	}
 
@@ -363,7 +365,7 @@ bool mayaSvn::getFilename(const MString& nameType, MString& filename)
 
 	#undef NAMEOP
 	#define NAMEOP(name)	\
-		if (!stricmp(# name, nameType.asChar())) \
+		if (!_stricmp(# name, nameType.asChar())) \
 		{ \
 			filename = MFileIO::name(&stat); \
 			return stat; \
@@ -371,7 +373,7 @@ bool mayaSvn::getFilename(const MString& nameType, MString& filename)
 
 	NAMETYPES
 
-	errPrintf ("unknown name type, known types:");
+	errPrintf ("unknown name type, known types:\n");
 	#undef NAMEOP
 	#define NAMEOP(name)	\
 		statPrintf (# name);
@@ -386,12 +388,12 @@ bool mayaSvn::addEventScript(const MString& eventLabel, const MString& scriptNam
 	MsgInfo* pInfo = findMsgInfo(eventLabel);
 	if (!pInfo)
 	{
-		errPrintf ("unknown event \"%s\"", eventLabel.asChar());
+		errPrintf ("unknown event \"%s\"\n", eventLabel.asChar());
 		return false;
 	}
 
 	pInfo->melScripts[scriptName.asChar()] = MelInfo(melScript, bDisplayEnabled, bUndoEnabled);
-	dbgPrintf ("script \"%s\" added to event \"%s\"", scriptName.asChar(), eventLabel.asChar());
+	dbgPrintf ("script \"%s\" added to event \"%s\"\n", scriptName.asChar(), eventLabel.asChar());
 	return true;
 }
 
@@ -400,19 +402,19 @@ bool mayaSvn::delEventScript(const MString& eventLabel, const MString& scriptNam
 	MsgInfo* pInfo = findMsgInfo(eventLabel);
 	if (!pInfo)
 	{
-		errPrintf ("unknown event \"%s\"", eventLabel.asChar());
+		errPrintf ("unknown event \"%s\"\n", eventLabel.asChar());
 		return false;
 	}
 
 	MelMap::iterator it = pInfo->melScripts.find(scriptName.asChar());
 	if (it == pInfo->melScripts.end())
 	{
-		warnPrintf ("no script \"%s\" attached to event \"%s\"", scriptName.asChar(), eventLabel.asChar());
+		warnPrintf ("no script \"%s\" attached to event \"%s\"\n", scriptName.asChar(), eventLabel.asChar());
 		return true;
 	}
 
 	pInfo->melScripts.erase(it);
-	dbgPrintf ("script \"%s\" deleted from event \"%s\"", scriptName.asChar(), eventLabel.asChar());
+	dbgPrintf ("script \"%s\" deleted from event \"%s\"\n", scriptName.asChar(), eventLabel.asChar());
 	return true;
 }
 
@@ -424,13 +426,13 @@ bool mayaSvn::compareFiles(const MString& file1, const MString& file2)
 	int fh1 = -1;
 	int fh2 = -1;
 
-	fh1 = open(file1.asChar(), O_RDONLY | O_BINARY, S_IREAD);
+	fh1 = _open(file1.asChar(), O_RDONLY | O_BINARY, S_IREAD);
 	if (fh1 < 0) goto cleanup;
-	fh2 = open(file2.asChar(), O_RDONLY | O_BINARY, S_IREAD);
+	fh2 = _open(file2.asChar(), O_RDONLY | O_BINARY, S_IREAD);
 	if (fh2 < 0) goto cleanup;
 
-	long size1 = filelength (fh1);
-	long size2 = filelength (fh2);
+	long size1 = _filelength (fh1);
+	long size2 = _filelength (fh2);
 
 	if (size1 == size2)
 	{
@@ -438,8 +440,8 @@ bool mayaSvn::compareFiles(const MString& file1, const MString& file2)
 		{
 			long sizeToRead = size1 > sizeof(buffer1) ? sizeof(buffer1) : size1;
 
-			read(fh1, buffer1, sizeToRead);
-			read(fh2, buffer2, sizeToRead);
+			_read(fh1, buffer1, sizeToRead);
+			_read(fh2, buffer2, sizeToRead);
 
 			if (memcmp(buffer1, buffer2, sizeToRead))
 			{
@@ -453,8 +455,8 @@ bool mayaSvn::compareFiles(const MString& file1, const MString& file2)
 	}
 
 cleanup:
-	if (fh2 >= 0) close(fh2);
-	if (fh1 >= 0) close(fh1);
+	if (fh2 >= 0) _close(fh2);
+	if (fh1 >= 0) _close(fh1);
 
 	return result;
 }
@@ -598,8 +600,8 @@ MStatus mayaSvn::remove()
 #define kDelEventFlagLong		"-delEvent"
 #define kScriptNameFlag			"-sn"
 #define kScriptNameFlagLong		"-scriptName"
-#define kMelFlag				"-m"
-#define kMelFlagLong			"-mel"
+#define kMelFlag				"-mel"
+#define kMelFlagLong			"-melScript"
 #define kDisplayEnabledFlag		"-ds"
 #define kDisplayEnabledFlagLong	"-displayEnabled"
 #define kUndoEnabledFlag		"-ue"
@@ -698,12 +700,12 @@ MStatus mayaSvn::doIt( const MArgList& args )
 
 		if (!argData.isFlagSet(kScriptNameFlag))
 		{
-			errPrintf ("no -scriptName specified");
+			errPrintf ("no -scriptName specified\n");
 			return MStatus::kFailure;
 		}
 		if (!argData.isFlagSet(kMelFlag))
 		{
-			errPrintf ("no -mel specified");
+			errPrintf ("no -mel specified\n");
 			return MStatus::kFailure;
 		}
 
@@ -726,7 +728,7 @@ MStatus mayaSvn::doIt( const MArgList& args )
 
 		if (!argData.isFlagSet(kScriptNameFlag))
 		{
-			errPrintf ("no -scriptName specified");
+			errPrintf ("no -scriptName specified\n");
 			return MStatus::kFailure;
 		}
 
@@ -745,7 +747,7 @@ MStatus mayaSvn::doIt( const MArgList& args )
 
 		if (!argData.isFlagSet(kFile2Flag))
 		{
-			errPrintf ("no -file2 specified");
+			errPrintf ("no -file2 specified\n");
 			return MStatus::kFailure;
 		}
 
