@@ -1925,7 +1925,7 @@ global proc SVNBeforeOpen ()
             if ($result == 1)
             {
                 dprint ("// getting lock\n");
-                if (SVNGetLock($svnFile, ""))
+				if (SVNGetLock($svnFile, ""))
                 {
                     print ("// good: got the lock\n");
                 }
